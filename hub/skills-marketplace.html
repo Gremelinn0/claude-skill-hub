@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill Hub — Vitrine perso</title>
+<style>
+/* ===== TOKENS — Éditorial chaud ===== */
+:root {
+  --bg: #f7f3ee;
+  --bg2: #ede8e0;
+  --card: #faf7f2;
+  --paper: #ffffff;
+  --border: #ddd5c8;
+  --border-warm: #c8b89a;
+  --ink: #2c2520;
+  --ink2: #574f48;
+  --muted: #8a7d72;
+  --accent: #c0613b;
+  --accent-soft: #f9ede8;
+  --ocre: #c4962a;
+  --ocre-soft: #fdf5e0;
+  --sage: #5c7a5c;
+  --sage-soft: #edf4ed;
+  --azure: #4f6d8c;
+  --azure-soft: #eaf0f5;
+  --keep-color: var(--sage);
+  --keep-soft: var(--sage-soft);
+  --store-color: var(--ocre);
+  --store-soft: var(--ocre-soft);
+  --archive-color: var(--accent);
+  --archive-soft: var(--accent-soft);
+  --move-color: var(--azure);
+  --move-soft: var(--azure-soft);
+  --dup-color: #7a4f8a;
+  --dup-soft: #f3eaf6;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Monaco, Menlo, Consolas, monospace;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(44,37,32,.07), 0 2px 8px rgba(44,37,32,.05);
+  --shadow-lg: 0 4px 16px rgba(44,37,32,.10), 0 8px 32px rgba(44,37,32,.06);
+  --list-w: 380px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.55;
+  overflow: hidden;
+}
+button { cursor: pointer; font-family: inherit; }
+a { color: var(--accent); text-decoration: none; }
+
+/* ===== TOPBAR ===== */
+#topbar {
+  background: var(--card);
+  border-bottom: 2px solid var(--border-warm);
+  padding: 12px 20px 0;
+  flex-shrink: 0;
+}
+#topbar-row1 {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding-bottom: 10px;
+}
+#brand { display: flex; align-items: baseline; gap: 8px; flex-shrink: 0; }
+#brand-title {
+  font-family: var(--serif); font-size: 21px; font-weight: normal;
+  color: var(--ink); letter-spacing: -0.3px;
+}
+#brand-sub { font-size: 12px; color: var(--muted); }
+#search-wrap { flex: 1; min-width: 200px; position: relative; }
+#search {
+  width: 100%; padding: 8px 14px 8px 36px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--bg); font-size: 13.5px; color: var(--ink);
+  transition: border-color .15s;
+}
+#search:focus { outline: none; border-color: var(--accent); }
+#search-icon {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); font-size: 14px; pointer-events: none;
+}
+.seg-toggle {
+  display: flex; border: 1.5px solid var(--border); border-radius: 8px;
+  overflow: hidden; flex-shrink: 0;
+}
+.seg-toggle button {
+  padding: 7px 14px; border: none; background: var(--bg);
+  font-size: 12.5px; font-weight: 600; color: var(--muted);
+  transition: all .15s;
+}
+.seg-toggle button:not(:last-child) { border-right: 1px solid var(--border); }
+.seg-toggle button:hover { background: var(--bg2); color: var(--ink2); }
+.seg-toggle button.active { background: var(--accent); color: #fff; }
+#mode-toggle button.active { background: var(--ink); }
+#topbar-row2 {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding-bottom: 10px; font-size: 12.5px;
+}
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 14px;
+  background: var(--bg); border: 1px solid var(--border);
+  font-size: 12px; color: var(--ink2); cursor: pointer; user-select: none;
+  transition: all .12s;
+}
+.filter-chip:hover { border-color: var(--border-warm); }
+.filter-chip.active {
+  background: var(--accent-soft); border-color: var(--accent); color: var(--accent);
+  font-weight: 600;
+}
+.filter-chip .ct { color: var(--muted); font-size: 11px; }
+.filter-chip.active .ct { color: var(--accent); }
+.filter-group {
+  display: inline-flex; align-items: center; gap: 4px;
+  position: relative;
+}
+.filter-group > label {
+  font-size: 11px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.4px; margin-right: 4px;
+}
+.active-filters {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  padding: 0 0 10px;
+}
+.active-filter {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 8px; background: var(--accent-soft); color: var(--accent);
+  border-radius: 4px; font-size: 11.5px; font-weight: 600;
+}
+.active-filter .x {
+  cursor: pointer; opacity: 0.6; font-size: 13px; line-height: 1;
+}
+.active-filter .x:hover { opacity: 1; }
+#clear-filters {
+  font-size: 11.5px; color: var(--muted); background: none;
+  border: none; text-decoration: underline; padding: 0;
+}
+#clear-filters:hover { color: var(--accent); }
+
+/* ===== STATS BAR ===== */
+#stats {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 9px 20px; background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px; color: var(--ink2); flex-shrink: 0;
+}
+#stats b { color: var(--ink); font-weight: 700; }
+#progress {
+  flex: 1; min-width: 200px; max-width: 350px;
+  display: flex; align-items: center; gap: 8px;
+}
+#progress-bar {
+  flex: 1; height: 6px; background: var(--border);
+  border-radius: 3px; overflow: hidden;
+}
+#progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--sage), var(--ocre));
+  width: 0%; transition: width .3s;
+}
+#stats-actions { margin-left: auto; display: flex; gap: 8px; }
+.btn {
+  padding: 6px 12px; border: 1px solid var(--border);
+  background: var(--paper); border-radius: 6px;
+  font-size: 12.5px; font-weight: 600; color: var(--ink2);
+  transition: all .12s;
+}
+.btn:hover { border-color: var(--border-warm); background: var(--bg); }
+.btn-primary {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.btn-primary:hover { background: #a85130; border-color: #a85130; }
+.btn-primary:disabled {
+  opacity: 0.4; cursor: default; background: var(--accent); border-color: var(--accent);
+}
+.btn-ink { background: var(--ink); color: #fff; border-color: var(--ink); }
+.btn-ink:hover { background: #1a1611; border-color: #1a1611; }
+
+/* ===== BODY LAYOUT (master-detail adaptatif) =====
+   Sans sélection : liste plein écran (vision globale).
+   Avec sélection : liste compacte à gauche (~320px) + panneau large à droite.
+   Plein écran (toggle) : panneau prend tout, liste cachée. */
+#body {
+  display: grid;
+  grid-template-columns: 1fr;
+  height: 0; flex: 1; min-height: 0;
+}
+body { display: flex; flex-direction: column; }
+body.detail-open #body { grid-template-columns: 320px 1fr; }
+body.fullscreen-panel #body { grid-template-columns: 1fr; }
+body.fullscreen-panel #list-pane { display: none; }
+#list-pane {
+  background: var(--card); border-right: 1px solid var(--border);
+  overflow-y: auto; min-height: 0;
+}
+body:not(.detail-open) #list-pane { border-right: none; }
+#detail-pane {
+  background: var(--paper); overflow-y: auto; min-height: 0;
+  position: relative;
+}
+body:not(.detail-open) #detail-pane { display: none; }
+body.detail-open .row-line1 .row-name { font-size: 13px; }
+body.detail-open .row-body { padding: 7px 11px 7px 8px; }
+body:not(.detail-open) .row-body { padding: 11px 16px 11px 12px; }
+body:not(.detail-open) .row-line1 .row-name { font-size: 14px; }
+
+/* ===== LIST (left) ===== */
+.group {
+  border-bottom: 1px solid var(--border);
+}
+.group-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px 8px; background: var(--card);
+  position: sticky; top: 0; z-index: 5;
+  cursor: pointer; user-select: none;
+  border-bottom: 1px solid var(--border);
+}
+.group-head .chev {
+  font-size: 11px; color: var(--muted);
+  transition: transform .15s;
+}
+.group.collapsed .chev { transform: rotate(-90deg); }
+.group.collapsed .group-body { display: none; }
+.group-head h2 {
+  flex: 1; font-family: var(--serif); font-size: 14.5px;
+  font-weight: normal; color: var(--ink); letter-spacing: 0;
+}
+.group-head .count {
+  font-size: 11.5px; color: var(--muted); font-weight: 600;
+  background: var(--bg); padding: 1px 8px; border-radius: 10px;
+}
+.row {
+  display: grid; grid-template-columns: 4px 1fr auto;
+  gap: 0; padding: 0;
+  border-bottom: 1px solid var(--bg2);
+  cursor: pointer; transition: background .1s;
+  position: relative;
+}
+.row:hover { background: var(--bg); }
+.row.selected { background: var(--ocre-soft); }
+.row.selected::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--ocre);
+}
+.row-strip {
+  width: 3px;
+}
+.row.d-store .row-strip { background: var(--store-color); }
+.row.d-archive .row-strip { background: var(--archive-color); }
+.row.d-move .row-strip { background: var(--move-color); }
+.row.d-duplicate .row-strip { background: var(--dup-color); }
+.row-body {
+  padding: 8px 12px 8px 8px; min-width: 0;
+}
+.row-line1 {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13.5px; font-weight: 600; color: var(--ink);
+  margin-bottom: 2px;
+}
+.row-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-mark { font-size: 12px; color: var(--muted); }
+.row-mark.reco { color: var(--ocre); }
+.row-mark.dup { color: var(--dup-color); }
+.row-line2 {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12.5px; color: var(--ink2);
+  min-width: 0;
+  line-height: 1.4;
+}
+.row-desc {
+  flex: 1; min-width: 0;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden; word-break: normal;
+  white-space: normal;
+}
+body.detail-open .row-desc { -webkit-line-clamp: 2; }
+.row-badge {
+  font-size: 10.5px; padding: 1px 6px; border-radius: 3px;
+  background: var(--bg2); color: var(--ink2);
+  font-weight: 600; flex-shrink: 0; max-width: 110px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.row-badge.scope-global { background: var(--azure-soft); color: var(--azure); }
+
+/* ===== DETAIL PANEL (right) ===== */
+.empty-detail {
+  padding: 60px 30px; text-align: center; color: var(--muted);
+  font-family: var(--serif); font-size: 17px;
+}
+.empty-detail .hint { font-family: var(--sans); font-size: 13px; margin-top: 10px; }
+.detail-header {
+  position: sticky; top: 0; z-index: 8; background: var(--paper);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px 12px;
+}
+.detail-bar {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.detail-bar .back {
+  /* Bouton "fermer le panneau" — toujours visible (desktop & mobile).
+     Permet de revenir à la vue liste plein écran (mode A) depuis le mode split ou plein écran. */
+  display: flex;
+}
+.detail-name {
+  flex: 1; font-family: var(--serif); font-size: 24px;
+  font-weight: normal; color: var(--ink); letter-spacing: -0.4px;
+  word-break: break-word;
+}
+.icon-btn {
+  width: 30px; height: 30px; border: 1px solid var(--border);
+  background: var(--paper); border-radius: 6px; color: var(--muted);
+  font-size: 14px; display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.icon-btn:hover { background: var(--bg); color: var(--ink); }
+.detail-badges {
+  display: flex; flex-wrap: wrap; gap: 5px;
+}
+.detail-badges .badge {
+  font-size: 11.5px; padding: 3px 9px; border-radius: 4px;
+  font-weight: 600; background: var(--bg); color: var(--ink2);
+}
+.detail-badges .badge.usage { background: var(--ocre-soft); color: var(--ocre); }
+.detail-badges .badge.repo { background: var(--accent-soft); color: var(--accent); }
+.detail-badges .badge.scope-global { background: var(--azure-soft); color: var(--azure); }
+.detail-body {
+  padding: 16px 24px 60px;
+  max-width: 880px;
+}
+/* En mode plein écran panneau, le contenu prend toute la largeur disponible (large écran).
+   Sinon le max-width fait apparaître une grosse bande blanche à droite. */
+body.fullscreen-panel .detail-body {
+  max-width: 1200px;
+  padding: 20px 40px 80px;
+}
+body.fullscreen-panel .md-textarea {
+  min-height: 72vh;
+}
+.detail-section { margin-bottom: 22px; }
+.detail-section h3 {
+  font-family: var(--serif); font-size: 13px;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--muted); font-weight: normal;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border); padding-bottom: 6px;
+}
+
+/* Decision block */
+.decision-block {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; margin-bottom: 18px;
+}
+.decision-block .legend {
+  font-size: 11.5px; color: var(--muted); margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
+}
+.action-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.act-btn {
+  padding: 7px 14px; border: 1.5px solid var(--border);
+  background: var(--paper); border-radius: 7px;
+  font-size: 13px; font-weight: 600; color: var(--ink2);
+  transition: all .12s;
+}
+.act-btn:hover { border-color: var(--border-warm); }
+.act-btn.active { color: #fff; }
+.act-btn.keep.active { background: var(--keep-color); border-color: var(--keep-color); }
+.act-btn.store.active { background: var(--store-color); border-color: var(--store-color); }
+.act-btn.archive.active { background: var(--archive-color); border-color: var(--archive-color); }
+.move-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.move-row label {
+  font-size: 12px; color: var(--muted); font-weight: 600;
+  min-width: 130px;
+}
+.move-row select {
+  padding: 6px 10px; border: 1.5px solid var(--border);
+  border-radius: 6px; background: var(--paper); font-size: 13px;
+  color: var(--ink); font-family: inherit;
+}
+.move-row select:focus { outline: none; border-color: var(--move-color); }
+.row.d-move .row-strip, .act-btn.move.active { background: var(--move-color); }
+.act-btn.move.active { color: #fff; border-color: var(--move-color); }
+.dup-row { margin-top: 10px; }
+.dup-row label {
+  display: block; font-size: 12px; color: var(--muted);
+  font-weight: 600; margin-bottom: 6px;
+}
+.dup-targets {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding: 6px; min-height: 38px;
+  background: var(--paper); border: 1.5px dashed var(--border); border-radius: 6px;
+}
+.dup-targets.empty { color: var(--muted); font-style: italic; font-size: 12px; padding: 8px; }
+.dup-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 8px; background: var(--dup-soft); color: var(--dup-color);
+  border-radius: 4px; font-size: 12px; font-weight: 600;
+}
+.dup-chip .x { cursor: pointer; opacity: 0.6; font-size: 13px; }
+.dup-chip .x:hover { opacity: 1; }
+.dup-add-wrap { position: relative; display: inline-block; }
+.dup-add {
+  padding: 4px 10px; font-size: 12px; color: var(--dup-color);
+  background: var(--dup-soft); border: 1px dashed var(--dup-color);
+  border-radius: 4px; font-weight: 600;
+}
+.dup-pop {
+  position: absolute; top: 100%; left: 0; margin-top: 4px;
+  background: var(--paper); border: 1px solid var(--border-warm);
+  border-radius: 6px; box-shadow: var(--shadow-lg);
+  padding: 6px; min-width: 200px; z-index: 12; max-height: 240px; overflow-y: auto;
+}
+.dup-pop label {
+  display: flex; align-items: center; gap: 7px; padding: 4px 8px;
+  font-size: 12.5px; cursor: pointer; border-radius: 4px;
+  font-weight: 500; color: var(--ink);
+}
+.dup-pop label:hover { background: var(--bg); }
+.dup-pop input { margin: 0; }
+
+/* Reco */
+.reco-block {
+  background: var(--ocre-soft); border-left: 3px solid var(--ocre);
+  padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.reco-text { flex: 1; font-size: 13px; color: var(--ink2); }
+.reco-text b { color: var(--ocre); }
+
+/* Description / Summary */
+.detail-desc { font-size: 14.5px; line-height: 1.65; color: var(--ink2); }
+.detail-summary {
+  font-size: 13.5px; line-height: 1.7; color: var(--ink2);
+  background: var(--bg); border-left: 2px solid var(--border-warm);
+  padding: 12px 16px; border-radius: 0 6px 6px 0;
+  white-space: pre-wrap;
+}
+
+/* Doublons */
+.dup-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.dup-link {
+  padding: 4px 10px; background: var(--dup-soft); color: var(--dup-color);
+  border-radius: 4px; font-size: 12.5px; font-weight: 600;
+  cursor: pointer; transition: all .12s;
+}
+.dup-link:hover { background: var(--dup-color); color: #fff; }
+
+/* Full content (UNFOLDED by default) */
+.fullcontent-wrap {
+  background: var(--paper); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+}
+.fullcontent-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; background: var(--bg);
+  border-bottom: 1px solid var(--border); font-size: 12px; color: var(--muted);
+}
+.fullcontent-head .title { flex: 1; font-weight: 600; }
+.fullcontent {
+  padding: 22px 26px;
+  font-family: var(--mono); font-size: 13px; line-height: 1.75;
+  color: var(--ink); white-space: pre-wrap; word-break: break-word;
+  background: var(--paper);
+  /* Pas de max-height : on scrolle la page, pas une fenêtre interne. */
+}
+
+/* Meta footer */
+.meta-foot {
+  display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px;
+  font-size: 11.5px; color: var(--muted); margin-top: 20px;
+  padding-top: 14px; border-top: 1px dashed var(--border);
+}
+.meta-foot dt { font-weight: 600; }
+.meta-foot dd { word-break: break-all; font-family: var(--mono); font-size: 11px; }
+
+/* ===== DECISIONS DRAWER ===== */
+#drawer {
+  position: fixed; right: 0; top: 0; bottom: 0;
+  width: 380px; max-width: 90vw;
+  background: var(--card); border-left: 2px solid var(--border-warm);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(100%); transition: transform .25s ease;
+  z-index: 50; display: flex; flex-direction: column;
+}
+#drawer.open { transform: translateX(0); }
+#drawer-head {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+#drawer-head h2 {
+  flex: 1; font-family: var(--serif); font-size: 17px; font-weight: normal;
+}
+#drawer-body { flex: 1; overflow-y: auto; padding: 10px 0; }
+#drawer-foot {
+  padding: 12px 18px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--bg);
+}
+#drawer-foot .hint { font-size: 11.5px; color: var(--muted); }
+.drawer-section {
+  padding: 6px 18px 14px;
+}
+.drawer-section h3 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); font-weight: 700; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.drawer-section h3 .ct {
+  font-weight: 600; background: var(--bg2); color: var(--ink2);
+  padding: 1px 7px; border-radius: 10px; font-size: 10.5px;
+}
+.drawer-item {
+  display: grid; grid-template-columns: 4px 1fr auto;
+  background: var(--paper); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0; margin-bottom: 5px;
+  font-size: 12.5px; align-items: center; cursor: pointer;
+  transition: background .1s;
+  overflow: hidden;
+}
+.drawer-item:hover { background: var(--bg); }
+.drawer-item .strip { width: 3px; align-self: stretch; }
+.drawer-item.act-store .strip { background: var(--store-color); }
+.drawer-item.act-archive .strip { background: var(--archive-color); }
+.drawer-item.act-move .strip { background: var(--move-color); }
+.drawer-item.act-duplicate .strip { background: var(--dup-color); }
+.drawer-item.act-note .strip { background: #b8a06f; }
+.drawer-item-body { padding: 7px 10px; min-width: 0; }
+.drawer-item-name { font-weight: 600; color: var(--ink); }
+.drawer-item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drawer-item-meta { font-size: 11px; color: var(--muted); }
+.drawer-item-x {
+  padding: 0 11px; align-self: stretch; display: flex; align-items: center;
+  font-size: 16px; color: var(--muted); transition: all .1s;
+}
+.drawer-item-x:hover { background: var(--archive-soft); color: var(--archive-color); }
+#drawer-overlay {
+  position: fixed; inset: 0; background: rgba(44,37,32,.35); opacity: 0;
+  pointer-events: none; transition: opacity .25s; z-index: 49;
+}
+#drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+/* ===== CLAUDE.MD MODE ===== */
+body.mode-md #list-pane .group-head h2 {
+  font-size: 13.5px;
+}
+.md-textarea {
+  width: 100%; min-height: 60vh; padding: 16px 20px;
+  font-family: var(--mono); font-size: 13px; line-height: 1.65;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--paper); color: var(--ink); resize: vertical;
+}
+.md-textarea:focus { outline: none; border-color: var(--accent); }
+.md-modified-flag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; background: var(--accent-soft); color: var(--accent);
+  border-radius: 4px; font-size: 11.5px; font-weight: 600;
+}
+.md-sections {
+  font-size: 12.5px; color: var(--ink2); line-height: 1.9;
+  background: var(--bg); border-radius: 6px; padding: 10px 14px;
+}
+.md-sections .lvl1 { font-family: var(--serif); font-size: 14px; font-weight: 600; }
+.md-sections .lvl2 { padding-left: 14px; }
+.md-sections .lvl3 { padding-left: 28px; color: var(--muted); font-size: 12px; }
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px);
+  background: var(--ink); color: #fff; padding: 11px 22px;
+  border-radius: 8px; font-size: 13px; z-index: 100;
+  box-shadow: var(--shadow-lg); opacity: 0; transition: all .25s;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 860px) {
+  body.detail-open #body { grid-template-columns: 1fr; }
+  body.detail-open #list-pane { display: none; }
+  body.detail-open #detail-pane { display: block; position: fixed; inset: 0; z-index: 40; }
+}
+.empty-state {
+  text-align: center; color: var(--muted); padding: 80px 20px;
+  font-family: var(--serif); font-size: 16px;
+}
+.empty-state .hint { font-family: var(--sans); font-size: 13px; margin-top: 8px; }
+.loading {
+  text-align: center; color: var(--muted); padding: 60px 20px; font-size: 13px;
+}
+
+/* ===== FILTER CLUSTERS (chips inline in trigger) ===== */
+.filter-cluster {
+  display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 4px 6px;
+  position: relative; max-width: 100%;
+}
+.filter-cluster-label {
+  font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.5px; font-weight: 700; padding: 0 4px 0 6px;
+}
+.filter-cluster-chips { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.filter-chip-active {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 4px 2px 8px; background: var(--accent-soft); color: var(--accent);
+  border-radius: 4px; font-size: 11.5px; font-weight: 600;
+  white-space: nowrap;
+}
+.filter-chip-active .x {
+  cursor: pointer; opacity: 0.55; font-size: 14px; line-height: 1;
+  padding: 0 4px; border-radius: 3px;
+}
+.filter-chip-active .x:hover { opacity: 1; background: rgba(192,97,59,.15); }
+.filter-cluster-add {
+  padding: 3px 10px; background: transparent; border: 1px dashed var(--border-warm);
+  color: var(--muted); border-radius: 4px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; transition: all .12s;
+}
+.filter-cluster-add:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.filter-popover {
+  position: absolute; top: calc(100% + 4px); left: 0;
+  background: var(--paper); border: 1px solid var(--border-warm);
+  border-radius: 8px; box-shadow: var(--shadow-lg);
+  padding: 4px; min-width: 220px; max-width: 360px;
+  max-height: 320px; overflow-y: auto;
+  display: none; z-index: 25;
+}
+.filter-popover.open { display: block; }
+.filter-popover-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; padding: 7px 12px; background: transparent; border: none;
+  font-size: 12.5px; color: var(--ink); cursor: pointer;
+  border-radius: 4px; text-align: left; font-family: inherit;
+}
+.filter-popover-item:hover { background: var(--bg); }
+.filter-popover-item .ct { color: var(--muted); font-size: 11px; font-weight: 600; }
+.filter-popover-empty { padding: 10px 12px; font-size: 11.5px; color: var(--muted); font-style: italic; }
+
+/* ===== CHIP-GRID (move/duplicate in detail panel) ===== */
+.chip-grid {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;
+}
+.chip-target {
+  padding: 5px 12px; background: var(--paper); border: 1.5px solid var(--border);
+  border-radius: 6px; font-size: 12.5px; font-weight: 600; color: var(--ink2);
+  font-family: inherit; transition: all .12s; cursor: pointer;
+}
+.chip-target:hover { border-color: var(--border-warm); background: var(--bg); }
+.chip-target.move.active {
+  background: var(--move-color); color: #fff; border-color: var(--move-color);
+}
+.chip-target.duplicate.active {
+  background: var(--dup-color); color: #fff; border-color: var(--dup-color);
+}
+.move-section, .dup-section { margin-top: 14px; }
+.move-section .legend, .dup-section .legend {
+  font-size: 11px; color: var(--muted); margin-bottom: 2px;
+  text-transform: uppercase; letter-spacing: 0.7px; font-weight: 700;
+}
+
+/* ===== COMMENT BLOCK (en haut du panneau, toujours visible) ===== */
+.comment-top {
+  margin-bottom: 18px; padding: 12px 14px;
+  background: var(--ocre-soft); border: 1px solid #e8d8a5;
+  border-radius: 8px;
+}
+.comment-top label {
+  display: block; font-size: 11px; color: var(--ocre);
+  margin-bottom: 5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.comment-top label .opt {
+  text-transform: none; font-weight: 500; letter-spacing: 0; color: var(--muted);
+  margin-left: 4px;
+}
+.comment-top textarea {
+  width: 100%; padding: 8px 11px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--paper); font-family: inherit;
+  font-size: 13.5px; color: var(--ink); resize: vertical; min-height: 50px;
+  line-height: 1.5;
+}
+.comment-top textarea:focus { outline: none; border-color: var(--ocre); }
+
+/* ===== COMMENT BLOCK (legacy, inside decision-block — kept for safety) ===== */
+.comment-block {
+  margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border);
+}
+.comment-block label {
+  display: block; font-size: 11px; color: var(--muted);
+  margin-bottom: 5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+.comment-block textarea {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--paper); font-family: inherit;
+  font-size: 13px; color: var(--ink); resize: vertical; min-height: 54px;
+  line-height: 1.5;
+}
+.comment-block textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ===== COPY BUTTON BIG ===== */
+.copy-big {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; margin-top: 12px; padding: 10px 14px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--ink2); font-size: 13px; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: all .12s;
+}
+.copy-big:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div id="topbar-row1">
+    <div id="brand">
+      <span id="brand-title">Skill Hub</span>
+    </div>
+    <div id="search-wrap">
+      <span id="search-icon">⌕</span>
+      <input id="search" placeholder="Rechercher (nom, description, summary)...">
+    </div>
+    <div class="seg-toggle" id="mode-toggle">
+      <button data-mode="skills" class="active">Skills</button>
+      <button data-mode="md">CLAUDE.md</button>
+    </div>
+    <div class="seg-toggle" id="axis-toggle">
+      <button data-axis="repo" class="active">Par dépôt</button>
+      <button data-axis="usage">Par usage</button>
+    </div>
+  </div>
+  <div id="topbar-row2"></div>
+</div>
+
+<div id="stats">
+  <span><b id="stat-visible">0</b> / <b id="stat-total">0</b> skills visibles</span>
+  <span id="stat-decided" style="font-weight:600;color:var(--ink);">0 décision</span>
+  <div id="progress">
+    <span id="stat-pending">— sans décision</span>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+  </div>
+  <div id="stats-actions">
+    <button class="btn" id="btn-collapse-all">Tout replier</button>
+    <button class="btn" id="btn-drawer">Décisions (<span id="stat-drawer">0</span>)</button>
+    <button class="btn" id="btn-reset">Réinitialiser</button>
+    <button class="btn btn-primary" id="btn-export" disabled>Exporter</button>
+  </div>
+</div>
+
+<div id="body">
+  <div id="list-pane"><div class="loading">Chargement…</div></div>
+  <div id="detail-pane">
+    <div class="empty-detail">
+      Sélectionne un skill dans la liste.
+      <div class="hint">Tu pourras le garder, le mettre en réserve, le déplacer vers un autre dépôt, ou l'archiver.</div>
+    </div>
+  </div>
+</div>
+
+<div id="drawer-overlay"></div>
+<div id="drawer">
+  <div id="drawer-head">
+    <h2>Tes décisions</h2>
+    <button class="icon-btn" id="drawer-close" title="Fermer">×</button>
+  </div>
+  <div id="drawer-body"></div>
+  <div id="drawer-foot">
+    <button class="btn btn-primary" id="drawer-export-all" disabled>Tout exporter (skills + CLAUDE.md)</button>
+    <div style="display:flex;gap:6px;">
+      <button class="btn" id="drawer-export-skills" disabled style="flex:1;">Skills uniquement</button>
+      <button class="btn" id="drawer-export-md" disabled style="flex:1;">CLAUDE.md uniquement</button>
+    </div>
+    <span class="hint">Tu choisis exactement ce que tu exportes — évite d'embarquer du contenu non lié à ce que tu viens de modifier.</span>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+const LS_KEY = "skill-hub-v2-state-v1";
+// Recommandations pré-remplies (optionnel) — clé = "<repo-slug>::<skill-dir-name>".
+// Affichées en badge 💡 sur le skill ; l'utilisateur reste libre d'accepter ou non.
+// Édite cet objet si tu veux pré-remplir des recos pour TES skills.
+const RECOS = {
+  // Exemple :
+  // "my-project::old-skill": { action: "archive", reason: "remplacé par /new-skill" },
+};
+
+let SKILLS = [], REPOS = [], USAGE_MAP = {}, USAGE_ORDER = [], MD_FILES = [];
+let DUPLICATES = {};
+let state = {
+  view: "skills",       // 'skills' | 'md'
+  axis: "repo",         // 'repo' | 'usage'
+  search: "",
+  filters: { repo: [], usage: [], scope: [], decision: [] },
+  decisions: {},        // key -> { action, target, targets[] }
+  mdEdits: {},          // path -> { new_content, edited_at }
+  collapsed: { skills: {}, md: {} },
+  selected: null,       // key (repo::dir_name) for skills, path for md
+  fullscreen: false
+};
+function keyOf(s) { return s.repo + "::" + s.dir_name; }
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_KEY));
+    if (s) state = Object.assign(state, s);
+    if (!state.filters) state.filters = { repo: [], usage: [], scope: [], decision: [] };
+    if (!state.collapsed) state.collapsed = { skills: {}, md: {} };
+    if (!state.collapsed.skills) state.collapsed.skills = {};
+    if (!state.collapsed.md) state.collapsed.md = {};
+    if (!state.decisions) state.decisions = {};
+    if (!state.mdEdits) state.mdEdits = {};
+  } catch(e) {}
+}
+function saveState() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+function usageOf(s) { return USAGE_MAP[keyOf(s)] || "Non classé"; }
+function closeDetail() {
+  // Mode A : liste seule, panneau fermé. Sort aussi du plein écran s'il était actif.
+  state.selected = null;
+  state.fullscreen = false;
+  document.body.classList.remove("detail-open", "fullscreen-panel");
+  saveState(); render();
+}
+function toggleFullscreen() {
+  // Mode B ↔ C : split ↔ panneau plein écran.
+  state.fullscreen = !state.fullscreen;
+  document.body.classList.toggle("fullscreen-panel", state.fullscreen);
+  saveState();
+}
+function descOf(s) {
+  const d = (s.description || "").trim();
+  if (d) return d;
+  const sum = (s.summary || "").trim();
+  if (sum) { const m = sum.match(/^[^.!?\n]+[.!?]?/); return m ? m[0] : sum.slice(0, 120); }
+  return "—";
+}
+function decisionOf(key) {
+  const d = state.decisions[key];
+  if (!d) return null;
+  return d.action;
+}
+
+async function init() {
+  loadState();
+  try {
+    const [sd, um, md] = await Promise.all([
+      fetch("skills-data.json").then(r => r.json()),
+      fetch("skills-usage-map.json").then(r => r.json()).catch(() => ({ map: {}, categories_order: [] })),
+      fetch("claude-md-data.json").then(r => r.json()).catch(() => ({ files: [], repos: [] }))
+    ]);
+    SKILLS = sd.skills || [];
+    REPOS = sd.repos || [];
+    USAGE_MAP = um.map || {};
+    USAGE_ORDER = um.categories_order || [];
+    MD_FILES = md.files || [];
+    // Index doublons
+    const byName = {};
+    SKILLS.forEach(s => { (byName[s.dir_name] = byName[s.dir_name] || []).push(s); });
+    DUPLICATES = {};
+    Object.keys(byName).forEach(n => { if (byName[n].length > 1) DUPLICATES[n] = byName[n]; });
+  } catch (e) {
+    document.getElementById("list-pane").innerHTML = '<div class="empty-state">Erreur de chargement.<div class="hint">' + esc(e.message || e) + '</div></div>';
+    return;
+  }
+  bindUI();
+  render();
+}
+
+function bindUI() {
+  document.querySelectorAll("#mode-toggle button").forEach(b => {
+    b.classList.toggle("active", b.dataset.mode === state.view);
+    b.onclick = () => { setMode(b.dataset.mode); };
+  });
+  document.querySelectorAll("#axis-toggle button").forEach(b => {
+    b.classList.toggle("active", b.dataset.axis === state.axis);
+    b.onclick = () => {
+      state.axis = b.dataset.axis;
+      document.querySelectorAll("#axis-toggle button").forEach(x => x.classList.toggle("active", x === b));
+      saveState(); render();
+    };
+  });
+  const search = document.getElementById("search");
+  search.value = state.search || "";
+  search.oninput = () => { state.search = search.value; saveState(); render(); };
+  document.getElementById("btn-export").onclick = exportAll;
+  document.getElementById("drawer-export-all").onclick = exportAll;
+  document.getElementById("drawer-export-skills").onclick = exportSkillsOnly;
+  document.getElementById("drawer-export-md").onclick = exportMdAll;
+  document.getElementById("btn-reset").onclick = () => {
+    const n = Object.keys(state.decisions).length + Object.keys(state.mdEdits).length;
+    if (n && !confirm("Effacer les " + n + " modification(s) en cours ?")) return;
+    state.decisions = {}; state.mdEdits = {}; state.selected = null;
+    saveState(); render();
+  };
+  document.getElementById("btn-drawer").onclick = () => openDrawer(true);
+  document.getElementById("drawer-close").onclick = () => openDrawer(false);
+  document.getElementById("drawer-overlay").onclick = () => openDrawer(false);
+  // Click outside to close any open filter popover
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".filter-popover") && !e.target.closest(".filter-cluster-add")) {
+      document.querySelectorAll(".filter-popover.open").forEach(p => p.classList.remove("open"));
+    }
+  });
+  document.getElementById("btn-collapse-all").onclick = () => {
+    const cur = state.collapsed[state.view] || {};
+    const anyOpen = Object.values(cur).some(v => v === false) || Object.keys(cur).length === 0;
+    // collapse all visible groups by reading them after render
+    const groups = document.querySelectorAll(".group");
+    const cmap = {};
+    groups.forEach(g => { cmap[g.dataset.gkey] = true; });
+    state.collapsed[state.view] = anyOpen ? cmap : {};
+    document.getElementById("btn-collapse-all").textContent = anyOpen ? "Tout déplier" : "Tout replier";
+    saveState(); render();
+  };
+}
+
+function setMode(mode) {
+  state.view = mode;
+  state.selected = null;
+  document.body.classList.toggle("mode-md", mode === "md");
+  document.querySelectorAll("#mode-toggle button").forEach(x => x.classList.toggle("active", x.dataset.mode === mode));
+  // Axis toggle hidden in md mode
+  document.getElementById("axis-toggle").style.display = (mode === "md") ? "none" : "flex";
+  saveState(); render();
+}
+
+function render() {
+  renderFilterStrip();
+  if (state.view === "skills") {
+    renderSkillsList();
+    renderSkillDetail();
+  } else {
+    renderMdList();
+    renderMdDetail();
+  }
+  renderStats();
+  renderDrawer();
+}
+
+// ============ FILTER CLUSTERS (chips inline in trigger) ============
+function renderFilterStrip() {
+  const strip = document.getElementById("topbar-row2");
+  strip.innerHTML = "";
+  if (state.view === "md") {
+    strip.innerHTML = '<span style="color:var(--muted);font-size:12px;">Édite tes fichiers CLAUDE.md par dépôt. Les modifications partent dans l\'export.</span>';
+    return;
+  }
+  const totals = computeFilterCounts();
+  ["repo", "usage", "scope", "decision"].forEach(kind => {
+    strip.appendChild(makeFilterCluster(kind, totals[kind]));
+  });
+  // Global "tout effacer" if any filter active
+  const total = Object.values(state.filters).reduce((a, arr) => a + arr.length, 0);
+  if (total > 0) {
+    const clr = document.createElement("button");
+    clr.id = "clear-filters";
+    clr.textContent = "tout effacer";
+    clr.onclick = () => {
+      state.filters = { repo: [], usage: [], scope: [], decision: [] };
+      saveState(); render();
+    };
+    strip.appendChild(clr);
+  }
+}
+function computeFilterCounts() {
+  const list = baseList(false);
+  const repo = {}, usage = {}, scope = {}, decision = { keep: 0, store: 0, archive: 0, move: 0, duplicate: 0, none: 0 };
+  list.forEach(s => {
+    repo[s.repo] = (repo[s.repo] || 0) + 1;
+    const u = usageOf(s); usage[u] = (usage[u] || 0) + 1;
+    scope[s.scope] = (scope[s.scope] || 0) + 1;
+    const d = decisionOf(keyOf(s)) || "none"; decision[d] = (decision[d] || 0) + 1;
+  });
+  return { repo, usage, scope, decision };
+}
+function makeFilterCluster(kind, counts) {
+  const labels = { repo: "Dépôt", usage: "Usage", scope: "Scope", decision: "Décision" };
+  let options;
+  if (kind === "repo") {
+    options = REPOS.slice().sort((a, b) => a.slug === "global" ? -1 : b.slug === "global" ? 1 : a.slug.localeCompare(b.slug)).map(r => r.slug);
+  } else if (kind === "usage") {
+    const cats = new Set([...USAGE_ORDER, ...Object.keys(counts)]);
+    options = [...cats];
+  } else if (kind === "scope") {
+    options = ["global", "projet"];
+  } else {
+    options = ["none", "store", "archive", "move", "duplicate"];
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "filter-cluster";
+  wrap.dataset.kind = kind;
+
+  const lab = document.createElement("span");
+  lab.className = "filter-cluster-label";
+  lab.textContent = labels[kind];
+  wrap.appendChild(lab);
+
+  // Selected chips inline
+  state.filters[kind].forEach(v => {
+    const chip = document.createElement("span");
+    chip.className = "filter-chip-active";
+    chip.innerHTML = esc(v === "none" ? "sans décision" : v) + ' <span class="x" title="Retirer">×</span>';
+    chip.querySelector(".x").onclick = (e) => {
+      e.stopPropagation();
+      state.filters[kind] = state.filters[kind].filter(x => x !== v);
+      saveState(); render();
+    };
+    wrap.appendChild(chip);
+  });
+
+  // "+ ajouter" trigger
+  const plus = document.createElement("button");
+  plus.className = "filter-cluster-add";
+  plus.textContent = state.filters[kind].length ? "+" : "+ ajouter";
+  plus.title = "Ajouter un filtre " + labels[kind].toLowerCase();
+  wrap.appendChild(plus);
+
+  // Popover with remaining options
+  const pop = document.createElement("div");
+  pop.className = "filter-popover";
+  const remaining = options.filter(o => !state.filters[kind].includes(o));
+  if (remaining.length === 0) {
+    pop.innerHTML = '<div class="filter-popover-empty">Tous les ' + labels[kind].toLowerCase() + 's sont déjà sélectionnés.</div>';
+  } else {
+    remaining.forEach(o => {
+      const item = document.createElement("button");
+      item.className = "filter-popover-item";
+      const lbl = (o === "none") ? "sans décision" : o;
+      item.innerHTML = '<span>' + esc(lbl) + '</span><span class="ct">' + (counts[o] || 0) + '</span>';
+      item.onclick = (e) => {
+        e.stopPropagation();
+        state.filters[kind].push(o);
+        saveState(); render();
+      };
+      pop.appendChild(item);
+    });
+  }
+  wrap.appendChild(pop);
+
+  plus.onclick = (e) => {
+    e.stopPropagation();
+    const wasOpen = pop.classList.contains("open");
+    document.querySelectorAll(".filter-popover.open").forEach(p => p.classList.remove("open"));
+    if (!wasOpen) pop.classList.add("open");
+  };
+  return wrap;
+}
+
+// ============ LIST (skills) ============
+function baseList(applyFilters) {
+  let list = SKILLS;
+  const q = (state.search || "").trim().toLowerCase();
+  if (q) {
+    list = list.filter(s =>
+      (s.name || "").toLowerCase().includes(q) ||
+      (s.dir_name || "").toLowerCase().includes(q) ||
+      (s.description || "").toLowerCase().includes(q) ||
+      (s.summary || "").toLowerCase().includes(q)
+    );
+  }
+  if (!applyFilters) return list;
+  if (state.filters.repo.length) list = list.filter(s => state.filters.repo.includes(s.repo));
+  if (state.filters.usage.length) list = list.filter(s => state.filters.usage.includes(usageOf(s)));
+  if (state.filters.scope.length) list = list.filter(s => state.filters.scope.includes(s.scope));
+  if (state.filters.decision.length) {
+    list = list.filter(s => {
+      const d = decisionOf(keyOf(s)) || "none";
+      return state.filters.decision.includes(d);
+    });
+  }
+  return list;
+}
+function renderSkillsList() {
+  const list = baseList(true);
+  const groups = {};
+  if (state.axis === "repo") {
+    list.forEach(s => { (groups[s.repo] = groups[s.repo] || []).push(s); });
+  } else {
+    list.forEach(s => { const u = usageOf(s); (groups[u] = groups[u] || []).push(s); });
+  }
+  let order;
+  if (state.axis === "repo") {
+    order = ["global", ...Object.keys(groups).filter(r => r !== "global").sort()];
+  } else {
+    const known = USAGE_ORDER.filter(c => groups[c]);
+    const extra = Object.keys(groups).filter(c => !USAGE_ORDER.includes(c) && c !== "Non classé").sort();
+    order = [...known, ...extra];
+    if (groups["Non classé"]) order.push("Non classé");
+  }
+  const pane = document.getElementById("list-pane");
+  pane.innerHTML = "";
+  let shown = 0;
+  order.forEach(gname => {
+    const items = groups[gname];
+    if (!items || !items.length) return;
+    shown += items.length;
+    items.sort((a, b) => (a.name || a.dir_name).localeCompare(b.name || b.dir_name));
+    const gkey = "sk::" + gname;
+    const collapsed = state.collapsed.skills[gkey] === true;
+    const g = document.createElement("div");
+    g.className = "group" + (collapsed ? " collapsed" : "");
+    g.dataset.gkey = gkey;
+    g.innerHTML = '<div class="group-head"><span class="chev">▼</span><h2>' + esc(gname) + '</h2><span class="count">' + items.length + '</span></div>'
+      + '<div class="group-body"></div>';
+    g.querySelector(".group-head").onclick = () => {
+      state.collapsed.skills[gkey] = !state.collapsed.skills[gkey];
+      saveState(); g.classList.toggle("collapsed");
+    };
+    const body = g.querySelector(".group-body");
+    items.forEach(s => body.appendChild(makeRow(s)));
+    pane.appendChild(g);
+  });
+  document.getElementById("stat-visible").textContent = shown;
+  if (shown === 0) pane.innerHTML = '<div class="empty-state">Aucun skill ne correspond.<div class="hint">Effaçe la recherche ou les filtres.</div></div>';
+}
+function makeRow(s) {
+  const k = keyOf(s);
+  const dec = decisionOf(k);
+  const sel = state.selected === k;
+  const isDup = !!DUPLICATES[s.dir_name];
+  const hasReco = !!RECOS[k];
+  const entry = state.decisions[k];
+  const hasNote = entry && entry.comment && entry.comment.trim();
+  const r = document.createElement("div");
+  r.className = "row" + (dec ? " d-" + dec : "") + (sel ? " selected" : "");
+  r.dataset.k = k;
+  let badge;
+  if (state.axis === "repo") {
+    const u = usageOf(s);
+    badge = '<span class="row-badge" title="Usage">' + esc(u) + '</span>';
+  } else {
+    badge = '<span class="row-badge ' + (s.scope === "global" ? "scope-global" : "") + '" title="Dépôt">' + esc(s.repo) + '</span>';
+  }
+  r.innerHTML = '<div class="row-strip"></div>'
+    + '<div class="row-body">'
+    +   '<div class="row-line1">'
+    +     '<span class="row-name">' + esc(s.name || s.dir_name) + '</span>'
+    +     (hasReco ? '<span class="row-mark reco" title="Recommandation pré-remplie">💡</span>' : '')
+    +     (isDup ? '<span class="row-mark dup" title="Doublon — ce nom existe dans plusieurs dépôts">⧉</span>' : '')
+    +     (hasNote ? '<span class="row-mark" title="Tu as écrit une note sur ce skill">📝</span>' : '')
+    +   '</div>'
+    +   '<div class="row-line2">'
+    +     '<span class="row-desc">' + esc(descOf(s)) + '</span>'
+    +     badge
+    +   '</div>'
+    + '</div>'
+    + '<div></div>';
+  r.onclick = () => { state.selected = k; saveState(); document.body.classList.add("detail-open"); render(); };
+  return r;
+}
+
+// ============ DETAIL PANEL (skill) ============
+function renderSkillDetail() {
+  const pane = document.getElementById("detail-pane");
+  const k = state.selected;
+  if (!k) { pane.innerHTML = '<div class="empty-detail">Sélectionne un skill dans la liste.<div class="hint">Tu pourras le garder, le mettre en réserve, le déplacer vers un autre dépôt, ou l\'archiver.</div></div>'; return; }
+  const s = SKILLS.find(x => keyOf(x) === k);
+  if (!s) { pane.innerHTML = '<div class="empty-detail">Skill introuvable.</div>'; return; }
+  const dec = state.decisions[k] || {};
+  const recoData = RECOS[k];
+  const isDup = !!DUPLICATES[s.dir_name];
+  const otherTargets = REPOS.filter(r => r.slug !== s.repo);
+  const fs = state.fullscreen;
+  let html = '';
+  html += '<div class="detail-header">';
+  html +=   '<div class="detail-bar">';
+  html +=     '<button class="icon-btn back" id="d-back" title="Retour à la liste">←</button>';
+  html +=     '<div class="detail-name">' + esc(s.name || s.dir_name) + '</div>';
+  html +=     '<button class="icon-btn" id="d-fullscreen" title="' + (fs ? "Quitter le plein écran" : "Plein écran") + '">' + (fs ? '⛶' : '⛶') + '</button>';
+  html +=   '</div>';
+  html +=   '<div class="detail-badges">';
+  html +=     '<span class="badge repo">' + esc(s.repo) + '</span>';
+  html +=     '<span class="badge usage">' + esc(usageOf(s)) + '</span>';
+  html +=     '<span class="badge ' + (s.scope === "global" ? "scope-global" : "") + '">' + esc(s.scope || "") + '</span>';
+  if (isDup) html += '<span class="badge" style="background:var(--dup-soft);color:var(--dup-color);">⧉ doublon</span>';
+  html +=   '</div>';
+  html += '</div>';
+  html += '<div class="detail-body">';
+
+  // COMMENT BLOCK (toujours visible, en haut)
+  html += '<div class="comment-top">';
+  html +=   '<label for="d-comment">Notes sur ce skill <span class="opt">(optionnel — inclus dans l\'export)</span></label>';
+  html +=   '<textarea id="d-comment" rows="2" placeholder="Ex: skill obsolète depuis la migration · à fusionner avec X · doublon utile · à retravailler…">' + esc(dec.comment || "") + '</textarea>';
+  html += '</div>';
+
+  // DECISION BLOCK
+  html += '<div class="decision-block">';
+  html +=   '<div class="legend">Décision</div>';
+  html +=   '<div class="action-row">';
+  html +=     '<button class="act-btn keep' + (!dec.action ? " active" : "") + '" data-act="keep">Garder</button>';
+  html +=     '<button class="act-btn store' + (dec.action === "store" ? " active" : "") + '" data-act="store">Mettre en réserve</button>';
+  html +=     '<button class="act-btn archive' + (dec.action === "archive" ? " active" : "") + '" data-act="archive">Archiver</button>';
+  html +=   '</div>';
+  // Move (chip grid — tous les dépôts visibles, click pour sélectionner 1 cible)
+  html +=   '<div class="move-section">';
+  html +=     '<div class="legend">Déplacer vers un dépôt</div>';
+  html +=     '<div class="chip-grid">';
+  otherTargets.forEach(r => {
+    const active = (dec.action === "move" && dec.target === r.slug);
+    html += '<button class="chip-target move' + (active ? " active" : "") + '" data-act="move" data-target="' + esc(r.slug) + '">' + esc(r.slug) + '</button>';
+  });
+  html +=     '</div>';
+  html +=   '</div>';
+  // Duplicate (chip grid — tous les dépôts visibles, click pour toggle multi)
+  html +=   '<div class="dup-section">';
+  html +=     '<div class="legend">Dupliquer vers plusieurs dépôts</div>';
+  html +=     '<div class="chip-grid">';
+  const dupTargets = (dec.action === "duplicate" && Array.isArray(dec.targets)) ? dec.targets : [];
+  otherTargets.forEach(r => {
+    const active = dupTargets.includes(r.slug);
+    html += '<button class="chip-target duplicate' + (active ? " active" : "") + '" data-act="duplicate" data-target="' + esc(r.slug) + '">' + esc(r.slug) + '</button>';
+  });
+  html +=     '</div>';
+  html +=   '</div>';
+  html += '</div>';
+
+  // RECO
+  if (recoData) {
+    html += '<div class="reco-block">';
+    html +=   '<div class="reco-text">💡 Recommandation : <b>' + esc(recoData.action) + '</b> — ' + esc(recoData.reason) + '</div>';
+    html +=   '<button class="btn" id="d-apply-reco">Appliquer</button>';
+    html += '</div>';
+  }
+
+  // DESCRIPTION + SUMMARY
+  const desc = (s.description || "").trim();
+  if (desc) {
+    html += '<div class="detail-section"><h3>Description</h3><div class="detail-desc">' + esc(desc) + '</div></div>';
+  }
+  const sum = (s.summary || "").trim();
+  if (sum && sum !== desc) {
+    html += '<div class="detail-section"><h3>Résumé</h3><div class="detail-summary">' + esc(sum) + '</div></div>';
+  }
+
+  // DOUBLONS
+  if (isDup) {
+    const others = DUPLICATES[s.dir_name].filter(x => keyOf(x) !== k);
+    html += '<div class="detail-section"><h3>Doublons (' + others.length + ')</h3><div class="dup-list">';
+    others.forEach(o => {
+      html += '<span class="dup-link" data-jump="' + esc(keyOf(o)) + '">' + esc(o.repo) + '</span>';
+    });
+    html += '</div></div>';
+  }
+
+  // FULL CONTENT — DÉPLIÉ PAR DÉFAUT
+  html += '<div class="detail-section">';
+  html +=   '<h3>Contenu complet du SKILL.md (' + (s.lines || "?") + ' lignes)</h3>';
+  html +=   '<div class="fullcontent-wrap">';
+  html +=     '<div class="fullcontent-head">';
+  html +=       '<span class="title">SKILL.md</span>';
+  html +=       '<button class="icon-btn" id="d-copy" title="Copier dans le presse-papier">⧉</button>';
+  html +=     '</div>';
+  html +=     '<div class="fullcontent" id="d-fullcontent">' + esc(s.full_content || "(vide)") + '</div>';
+  html +=   '</div>';
+  html +=   '<button class="copy-big" id="d-copy-bottom" title="Copier le contenu complet du SKILL.md">📋 Copier le contenu complet</button>';
+  html += '</div>';
+
+  // META FOOT
+  html += '<dl class="meta-foot">';
+  html +=   '<dt>Chemin</dt><dd>' + esc(s.path || "") + '</dd>';
+  html +=   '<dt>Dépôt</dt><dd>' + esc(s.repo_path || s.repo) + '</dd>';
+  html +=   '<dt>Lignes</dt><dd>' + esc(s.lines || "?") + '</dd>';
+  html +=   '<dt>Commit</dt><dd>' + esc(s.last_commit_hash || "—") + '</dd>';
+  html += '</dl>';
+
+  html += '</div>'; // /detail-body
+  pane.innerHTML = html;
+  pane.scrollTop = 0;
+  bindDetailEvents(s, dec, otherTargets, recoData);
+}
+function bindDetailEvents(s, dec, otherTargets, recoData) {
+  const k = keyOf(s);
+  document.getElementById("d-back").onclick = closeDetail;
+  document.getElementById("d-fullscreen").onclick = () => { toggleFullscreen(); renderSkillDetail(); };
+  document.querySelectorAll(".act-btn").forEach(b => {
+    b.onclick = () => {
+      const a = b.dataset.act;
+      const prevComment = (state.decisions[k] || {}).comment || "";
+      if (a === "keep") {
+        // Garder = pas d'action filesystem, mais on préserve le commentaire s'il existe
+        if (prevComment.trim()) state.decisions[k] = { comment: prevComment };
+        else delete state.decisions[k];
+      } else {
+        state.decisions[k] = { action: a, comment: prevComment };
+      }
+      saveState(); render();
+    };
+  });
+  // Move chips — single target. Annulation = on retire l'action mais on préserve le commentaire.
+  document.querySelectorAll('.chip-target[data-act="move"]').forEach(b => {
+    b.onclick = () => {
+      const t = b.dataset.target;
+      const cur = state.decisions[k];
+      const prevComment = (cur && cur.comment) || "";
+      if (cur && cur.action === "move" && cur.target === t) {
+        if (prevComment.trim()) state.decisions[k] = { comment: prevComment };
+        else delete state.decisions[k];
+      } else {
+        state.decisions[k] = { action: "move", target: t, comment: prevComment };
+      }
+      saveState(); render();
+    };
+  });
+  // Duplicate chips — multi target toggle. Idem : on préserve le commentaire si on retire tout.
+  document.querySelectorAll('.chip-target[data-act="duplicate"]').forEach(b => {
+    b.onclick = () => {
+      const t = b.dataset.target;
+      let cur = state.decisions[k];
+      const prevComment = (cur && cur.comment) || "";
+      if (!cur || cur.action !== "duplicate") cur = { action: "duplicate", targets: [], comment: prevComment };
+      if (cur.targets.includes(t)) cur.targets = cur.targets.filter(x => x !== t);
+      else cur.targets.push(t);
+      if (!cur.targets.length) {
+        if (prevComment.trim()) state.decisions[k] = { comment: prevComment };
+        else delete state.decisions[k];
+      } else {
+        state.decisions[k] = cur;
+      }
+      saveState(); render();
+    };
+  });
+  // Comment textarea — toujours actif (commentaire possible SANS décision).
+  // Save sans re-render pour garder le focus + le curseur.
+  const ct = document.getElementById("d-comment");
+  if (ct) {
+    ct.oninput = () => {
+      const cur = state.decisions[k] || {};
+      const val = ct.value;
+      if (val.trim()) {
+        cur.comment = val;
+        state.decisions[k] = cur;
+      } else {
+        delete cur.comment;
+        if (!cur.action) delete state.decisions[k];
+        else state.decisions[k] = cur;
+      }
+      saveState();
+      // Maj légère des compteurs (sans re-render complet du panneau pour garder le focus)
+      renderStats();
+    };
+  }
+  if (recoData) {
+    const btn = document.getElementById("d-apply-reco");
+    btn.onclick = () => {
+      const prevComment = (state.decisions[k] || {}).comment || "";
+      state.decisions[k] = { action: recoData.action, comment: prevComment };
+      saveState(); render(); toast("Reco appliquée");
+    };
+  }
+  document.querySelectorAll(".dup-link").forEach(l => {
+    l.onclick = () => { state.selected = l.dataset.jump; saveState(); render(); };
+  });
+  const cpy = document.getElementById("d-copy");
+  if (cpy) cpy.onclick = () => {
+    navigator.clipboard.writeText(s.full_content || "").then(() => toast("Contenu copié"));
+  };
+  const cpyB = document.getElementById("d-copy-bottom");
+  if (cpyB) cpyB.onclick = () => {
+    navigator.clipboard.writeText(s.full_content || "").then(() => toast("Contenu SKILL.md copié dans le presse-papier"));
+  };
+}
+
+// ============ CLAUDE.MD MODE ============
+function renderMdList() {
+  const pane = document.getElementById("list-pane");
+  pane.innerHTML = "";
+  const q = (state.search || "").trim().toLowerCase();
+  let list = MD_FILES;
+  if (q) list = list.filter(f => (f.path || "").toLowerCase().includes(q) || (f.repo || "").toLowerCase().includes(q) || (f.full_content || "").toLowerCase().includes(q));
+  const byRepo = {};
+  list.forEach(f => { (byRepo[f.repo] = byRepo[f.repo] || []).push(f); });
+  const order = ["global", ...Object.keys(byRepo).filter(r => r !== "global").sort()];
+  let shown = 0;
+  order.forEach(rname => {
+    const items = byRepo[rname]; if (!items || !items.length) return;
+    shown += items.length;
+    items.sort((a, b) => (a.path || "").localeCompare(b.path || ""));
+    const gkey = "md::" + rname;
+    const collapsed = state.collapsed.md[gkey] === true;
+    const g = document.createElement("div");
+    g.className = "group" + (collapsed ? " collapsed" : "");
+    g.dataset.gkey = gkey;
+    g.innerHTML = '<div class="group-head"><span class="chev">▼</span><h2>' + esc(rname) + '</h2><span class="count">' + items.length + '</span></div><div class="group-body"></div>';
+    g.querySelector(".group-head").onclick = () => {
+      state.collapsed.md[gkey] = !state.collapsed.md[gkey];
+      saveState(); g.classList.toggle("collapsed");
+    };
+    const body = g.querySelector(".group-body");
+    items.forEach(f => {
+      const sel = state.selected === f.path;
+      const modif = !!state.mdEdits[f.path];
+      const r = document.createElement("div");
+      r.className = "row" + (sel ? " selected" : "") + (modif ? " d-store" : "");
+      const short = (f.path || "").split(/[\\\/]/).slice(-2).join("/");
+      r.innerHTML = '<div class="row-strip"></div>'
+        + '<div class="row-body">'
+        +   '<div class="row-line1"><span class="row-name">' + esc(short) + '</span>' + (modif ? '<span class="row-mark" style="color:var(--accent)">●</span>' : '') + '</div>'
+        +   '<div class="row-line2"><span class="row-desc">' + (f.lines || 0) + ' lignes · ' + (f.sections ? f.sections.length : 0) + ' sections</span></div>'
+        + '</div>'
+        + '<div></div>';
+      r.onclick = () => { state.selected = f.path; document.body.classList.add("detail-open"); saveState(); render(); };
+      body.appendChild(r);
+    });
+    pane.appendChild(g);
+  });
+  document.getElementById("stat-visible").textContent = shown;
+  if (shown === 0) pane.innerHTML = '<div class="empty-state">Aucun CLAUDE.md ne correspond.</div>';
+}
+function renderMdDetail() {
+  const pane = document.getElementById("detail-pane");
+  const path = state.selected;
+  if (!path) {
+    pane.innerHTML = '<div class="empty-detail">Sélectionne un CLAUDE.md à gauche.<div class="hint">Tu pourras le lire et l\'éditer ; tes modifications partent dans l\'export.</div></div>';
+    return;
+  }
+  const f = MD_FILES.find(x => x.path === path);
+  if (!f) { pane.innerHTML = '<div class="empty-detail">Fichier introuvable.</div>'; return; }
+  const edited = state.mdEdits[path];
+  const cur = edited ? edited.new_content : (f.full_content || "");
+  let html = '<div class="detail-header">';
+  html += '<div class="detail-bar"><button class="icon-btn back" id="d-back">←</button><div class="detail-name">' + esc((f.path || "").split(/[\\\/]/).slice(-2).join("/")) + '</div>'
+    + '<button class="icon-btn" id="d-fullscreen" title="Plein écran">⛶</button></div>';
+  html += '<div class="detail-badges"><span class="badge repo">' + esc(f.repo) + '</span><span class="badge">' + (f.lines || 0) + ' lignes</span>' + (edited ? '<span class="md-modified-flag">● modifié — non sauvegardé</span>' : '') + '</div>';
+  html += '</div>';
+  html += '<div class="detail-body">';
+  // Sections
+  if (f.sections && f.sections.length) {
+    html += '<div class="detail-section"><h3>Sommaire</h3><div class="md-sections">';
+    f.sections.forEach(sec => { html += '<div class="lvl' + sec.level + '">' + esc(sec.title) + '</div>'; });
+    html += '</div></div>';
+  }
+  // Editor
+  html += '<div class="detail-section"><h3>Contenu (éditable)</h3>';
+  html += '<textarea class="md-textarea" id="md-edit">' + esc(cur) + '</textarea>';
+  html += '<div style="margin-top:8px;display:flex;gap:8px;align-items:center;">';
+  html += '<button class="btn btn-primary" id="md-save">Marquer modifié</button>';
+  if (edited) html += '<button class="btn" id="md-revert">Annuler les modifications</button>';
+  if (edited) html += '<button class="btn" id="md-export-one">Exporter ce CLAUDE.md seul</button>';
+  html += '<span style="font-size:11.5px;color:var(--muted);">Tes modifs partent dans l\'export. Tu peux exporter ce fichier seul ou tout en bloc depuis le tiroir.</span>';
+  html += '</div></div>';
+  // Meta foot
+  html += '<dl class="meta-foot">';
+  html += '<dt>Chemin</dt><dd>' + esc(f.path) + '</dd>';
+  html += '<dt>Taille</dt><dd>' + esc(f.size || 0) + ' o</dd>';
+  html += '<dt>Modifié</dt><dd>' + esc(f.last_modified || "—") + '</dd>';
+  html += '</dl>';
+  html += '</div>';
+  pane.innerHTML = html;
+  document.getElementById("d-back").onclick = closeDetail;
+  document.getElementById("d-fullscreen").onclick = () => { toggleFullscreen(); renderMdDetail(); };
+  const ta = document.getElementById("md-edit");
+  document.getElementById("md-save").onclick = () => {
+    const nc = ta.value;
+    if (nc === (f.full_content || "")) {
+      // Revert if same
+      delete state.mdEdits[path]; toast("Aucun changement à enregistrer");
+    } else {
+      state.mdEdits[path] = { new_content: nc, edited_at: new Date().toISOString(), previous_size: f.size, new_size: nc.length };
+      toast("Modifications enregistrées (dans l'export)");
+    }
+    saveState(); render();
+  };
+  const rb = document.getElementById("md-revert");
+  if (rb) rb.onclick = () => { delete state.mdEdits[path]; saveState(); render(); toast("Modifications annulées"); };
+  const eb = document.getElementById("md-export-one");
+  if (eb) eb.onclick = () => exportMdOne(path);
+}
+
+// ============ STATS ============
+function renderStats() {
+  const actionCount = Object.values(state.decisions).filter(d => d.action).length;
+  const noteCount = Object.values(state.decisions).filter(d => !d.action && d.comment && d.comment.trim()).length;
+  const mdCount = Object.keys(state.mdEdits).length;
+  const totalExportable = actionCount + noteCount + mdCount;
+  document.getElementById("stat-total").textContent = state.view === "skills" ? SKILLS.length : MD_FILES.length;
+  let decLabel = actionCount + " décision" + (actionCount > 1 ? "s" : "");
+  if (noteCount) decLabel += " · " + noteCount + " note" + (noteCount > 1 ? "s" : "");
+  document.getElementById("stat-decided").textContent = decLabel;
+  document.getElementById("stat-drawer").textContent = totalExportable;
+  if (state.view === "skills") {
+    const pending = SKILLS.length - actionCount;
+    document.getElementById("stat-pending").textContent = pending + " sans décision";
+    const pct = SKILLS.length ? (actionCount / SKILLS.length) * 100 : 0;
+    document.getElementById("progress-fill").style.width = pct + "%";
+  } else {
+    const pending = MD_FILES.length - mdCount;
+    document.getElementById("stat-pending").textContent = pending + " non modifiés";
+    const pct = MD_FILES.length ? (mdCount / MD_FILES.length) * 100 : 0;
+    document.getElementById("progress-fill").style.width = pct + "%";
+  }
+  const skillCount = actionCount + noteCount;
+  document.getElementById("btn-export").disabled = totalExportable === 0;
+  document.getElementById("drawer-export-all").disabled = totalExportable === 0;
+  document.getElementById("drawer-export-skills").disabled = skillCount === 0;
+  document.getElementById("drawer-export-md").disabled = mdCount === 0;
+}
+
+// ============ DRAWER ============
+function openDrawer(open) {
+  document.getElementById("drawer").classList.toggle("open", open);
+  document.getElementById("drawer-overlay").classList.toggle("open", open);
+}
+function renderDrawer() {
+  const body = document.getElementById("drawer-body");
+  body.innerHTML = "";
+  const groups = { store: [], archive: [], move: [], duplicate: [], note: [] };
+  Object.keys(state.decisions).forEach(k => {
+    const d = state.decisions[k];
+    if (d.action && groups[d.action]) groups[d.action].push({ k, d });
+    else if (!d.action && d.comment && d.comment.trim()) groups.note.push({ k, d });
+  });
+  const mdEdited = Object.keys(state.mdEdits);
+  const total = Object.values(groups).reduce((a, g) => a + g.length, 0) + mdEdited.length;
+  if (total === 0) {
+    body.innerHTML = '<div class="empty-state" style="padding:40px 18px"><div style="font-size:14px">Aucune décision</div><div class="hint">Tes choix et notes apparaîtront ici. Tu pourras alors les exporter.</div></div>';
+    return;
+  }
+  const sections = [
+    { key: "store", label: "Mettre en réserve" },
+    { key: "archive", label: "Archiver" },
+    { key: "move", label: "Déplacer" },
+    { key: "duplicate", label: "Dupliquer" },
+    { key: "note", label: "Notes (sans action)" }
+  ];
+  sections.forEach(sec => {
+    const items = groups[sec.key];
+    if (!items.length) return;
+    const div = document.createElement("div");
+    div.className = "drawer-section";
+    div.innerHTML = '<h3>' + esc(sec.label) + ' <span class="ct">' + items.length + '</span></h3>';
+    items.forEach(({ k, d }) => {
+      const s = SKILLS.find(x => keyOf(x) === k);
+      if (!s) return;
+      const item = document.createElement("div");
+      item.className = "drawer-item act-" + sec.key;
+      let metaTxt = s.repo;
+      if (sec.key === "move" && d.target) metaTxt += " → " + d.target;
+      if (sec.key === "duplicate" && d.targets) metaTxt += " → " + d.targets.join(", ");
+      item.innerHTML = '<div class="strip"></div>'
+        + '<div class="drawer-item-body"><div class="drawer-item-name">' + esc(s.name || s.dir_name) + '</div><div class="drawer-item-meta">' + esc(metaTxt) + '</div></div>'
+        + '<div class="drawer-item-x" title="Annuler">×</div>';
+      item.onclick = (e) => {
+        if (e.target.closest(".drawer-item-x")) {
+          delete state.decisions[k];
+          saveState(); render();
+        } else {
+          state.view = "skills"; state.selected = k; document.body.classList.add("detail-open");
+          document.querySelectorAll("#mode-toggle button").forEach(x => x.classList.toggle("active", x.dataset.mode === "skills"));
+          saveState(); render(); openDrawer(false);
+        }
+      };
+      div.appendChild(item);
+    });
+    body.appendChild(div);
+  });
+  if (mdEdited.length) {
+    const div = document.createElement("div");
+    div.className = "drawer-section";
+    div.innerHTML = '<h3>CLAUDE.md modifiés <span class="ct">' + mdEdited.length + '</span></h3>';
+    mdEdited.forEach(path => {
+      const f = MD_FILES.find(x => x.path === path); if (!f) return;
+      const short = path.split(/[\\\/]/).slice(-2).join("/");
+      const item = document.createElement("div");
+      item.className = "drawer-item act-store";
+      item.innerHTML = '<div class="strip"></div>'
+        + '<div class="drawer-item-body"><div class="drawer-item-name">' + esc(short) + '</div><div class="drawer-item-meta">' + esc(f.repo) + '</div></div>'
+        + '<div class="drawer-item-x" title="Annuler">×</div>';
+      item.onclick = (e) => {
+        if (e.target.closest(".drawer-item-x")) {
+          delete state.mdEdits[path];
+          saveState(); render();
+        } else {
+          state.view = "md"; state.selected = path; document.body.classList.add("detail-open");
+          document.querySelectorAll("#mode-toggle button").forEach(x => x.classList.toggle("active", x.dataset.mode === "md"));
+          saveState(); render(); openDrawer(false);
+        }
+      };
+      div.appendChild(item);
+    });
+    body.appendChild(div);
+  }
+}
+
+// ============ EXPORT (granulaire) ============
+// 4 modes d'export selon ce que l'utilisateur veut isoler — évite d'embarquer
+// de la "merde" (décisions obsolètes / édits non liés).
+function buildSkillsDecisions() {
+  const out = [];
+  Object.keys(state.decisions).forEach(k => {
+    const d = state.decisions[k];
+    const s = SKILLS.find(x => keyOf(x) === k); if (!s) return;
+    const action = d.action || "note";
+    const base = {
+      dir_name: s.dir_name,
+      name: s.name || s.dir_name,
+      current_repo: s.repo,
+      current_path: s.path,
+      target_repos: [],
+      archive: false,
+      rename: false,
+      rework: false,
+      action
+    };
+    if (action === "archive") base.archive = true;
+    if (action === "move" && d.target) base.target_repos = [d.target];
+    if (action === "duplicate" && d.targets) base.target_repos = d.targets.slice();
+    if (d.comment && d.comment.trim()) base.comment = d.comment.trim();
+    out.push(base);
+  });
+  return out;
+}
+function buildMdEdits(filterPath) {
+  const paths = filterPath ? (state.mdEdits[filterPath] ? [filterPath] : []) : Object.keys(state.mdEdits);
+  return paths.map(path => {
+    const f = MD_FILES.find(x => x.path === path);
+    const e = state.mdEdits[path];
+    return {
+      repo: f ? f.repo : "",
+      path,
+      new_content: e.new_content,
+      edited_at: e.edited_at,
+      previous_size: e.previous_size,
+      new_size: e.new_size
+    };
+  });
+}
+function triggerDownload(filenameSuffix, skills_decisions, claude_md_edits) {
+  const out = {
+    source: "skills-marketplace",
+    exported_at: new Date().toISOString(),
+    repos_known: REPOS.map(r => ({ slug: r.slug, path: r.path })),
+    _note: "Format compatible apply_changes.py. action 'store' = mv vers <repo>/.claude/skills-store/. action 'note' = annotation seule.",
+    skills_decisions,
+    claude_md_edits
+  };
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "skill-hub-" + filenameSuffix + "-" + new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") + ".json";
+  a.click();
+}
+function exportAll() {
+  const sd = buildSkillsDecisions();
+  const md = buildMdEdits();
+  if (!sd.length && !md.length) { toast("Rien à exporter — aucune décision ni édition."); return; }
+  triggerDownload("all", sd, md);
+  toast(sd.length + " décision(s) skills + " + md.length + " CLAUDE.md exportés (tout)");
+}
+function exportSkillsOnly() {
+  const sd = buildSkillsDecisions();
+  if (!sd.length) { toast("Aucune décision skills à exporter."); return; }
+  triggerDownload("skills", sd, []);
+  toast(sd.length + " décision(s) skills exportées (sans CLAUDE.md)");
+}
+function exportMdAll() {
+  const md = buildMdEdits();
+  if (!md.length) { toast("Aucun CLAUDE.md modifié à exporter."); return; }
+  triggerDownload("claudemd", [], md);
+  toast(md.length + " CLAUDE.md exporté(s) (sans skills)");
+}
+function exportMdOne(path) {
+  const md = buildMdEdits(path);
+  if (!md.length) { toast("Ce CLAUDE.md n'a pas été modifié."); return; }
+  const f = MD_FILES.find(x => x.path === path);
+  const short = (f ? f.repo : "file");
+  triggerDownload("claudemd-" + short, [], md);
+  toast("CLAUDE.md " + short + " exporté seul");
+}
+// Backward-compat (un alias pour les handlers existants) :
+function exportDecisions() { exportAll(); }
+
+// ============ TOAST ============
+let toastTimer = 0;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 3500);
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Generated data files — user-specific, scan output
+hub/skills-data.json
+hub/claude-md-data.json
+
+# Backups created by apply_changes.py
+_archive/
+
+# Python
+__pycache__/
+*.pyc
+
+# Vercel
+.vercel/
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Exported decisions (user's working files)
+skill-hub-*.json

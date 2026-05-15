@@ -1,0 +1,21 @@
+{
+  "_comment": "Mapping <repo-slug>::<dir_name> → catégorie usage. Édite à la main. Skills absents = 'Non classé' sur la page. La vue 'Par usage' rend les catégories dans l'ordre de 'categories_order'. Adapte les catégories à TES domaines (dev, marketing, écriture, business…).",
+  "categories_order": [
+    "Tester & valider",
+    "Coder une feature",
+    "Documenter",
+    "Piloter & orchestrer",
+    "Outils dev quotidiens",
+    "Gérer skills, règles & routines",
+    "Session & migration",
+    "Recherche & contenu",
+    "Communication & email",
+    "Juridique",
+    "Notes & gestion de l'info",
+    "Backend & déploiement",
+    "Non classé"
+  ],
+  "map": {
+    "_README": "Exemple de format : 'my-repo::my-skill': 'Coder une feature'. Tu peux ranger tes 50, 100 ou 500 skills ici. La page lit ce fichier au chargement et affiche la vue 'Par usage' à partir de ce mapping."
+  }
+}
