@@ -76,9 +76,10 @@ def main():
 
     md_edits = data.get("claude_md_edits", [])
     skill_decisions = data.get("skills_decisions", [])
+    skill_edits = data.get("skills_edits", [])
     repos_known = data.get("repos_known", [])
 
-    if not md_edits and not skill_decisions:
+    if not md_edits and not skill_decisions and not skill_edits:
         print("Aucun changement dans le JSON. Rien à appliquer.")
         return
 
@@ -97,6 +98,13 @@ def main():
             delta = e.get("new_size", 0) - e.get("previous_size", 0)
             sign = "+" if delta >= 0 else ""
             print(f"   [{e['repo']:20s}] {short(e['path'])}  ({sign}{delta} bytes)")
+
+    if skill_edits:
+        print(f"\n✏ SKILL.md à éditer inline ({len(skill_edits)}) :")
+        for e in skill_edits:
+            delta = e.get("new_size", 0) - e.get("previous_size", 0)
+            sign = "+" if delta >= 0 else ""
+            print(f"   [{e['current_repo']:20s}] {e['dir_name']}  ({sign}{delta} chars)")
 
     if skill_decisions:
         print(f"\n🛠 Décisions skills ({len(skill_decisions)}) :")
@@ -141,6 +149,24 @@ def main():
             print(f"  EDIT  {short(str(src))}")
         except Exception as ex:
             print(f"  FAIL  {src} : {ex}")
+
+    # ── Apply SKILL.md edits (write new content with backup) ──
+    skill_edit_done = 0
+    for e in skill_edits:
+        src = Path(e["current_path"])
+        if not src.exists():
+            print(f"  WARN  SKILL.md introuvable {src} — skip édit")
+            continue
+        rel = e["current_repo"] + "_" + e["dir_name"] + "_SKILL.md"
+        bkp = backup_dir / "skill-md" / rel
+        bkp.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            shutil.copy2(src, bkp)
+            src.write_text(e["new_content"], encoding="utf-8")
+            skill_edit_done += 1
+            print(f"  EDIT-SKILL  {e['dir_name']} ({e['current_repo']})")
+        except Exception as ex:
+            print(f"  FAIL-SKILL  {src} : {ex}")
 
     # ── Apply skill decisions ──
     skill_done = 0
@@ -250,7 +276,7 @@ def main():
 
     # ── Recap ──
     print("\n" + "=" * 70)
-    print(f"OK · {edit_count} CLAUDE.md écrits · {skill_done} skills traités · backup {backup_dir.name}")
+    print(f"OK · {edit_count} CLAUDE.md écrits · {skill_edit_done} SKILL.md écrits · {skill_done} skills traités · backup {backup_dir.name}")
     if skill_skipped:
         print(f"\nSkippés ({len(skill_skipped)}) :")
         for name, reason in skill_skipped:

@@ -193,6 +193,10 @@ body { display: flex; flex-direction: column; }
 body.detail-open #body { grid-template-columns: 320px 1fr; }
 body.fullscreen-panel #body { grid-template-columns: 1fr; }
 body.fullscreen-panel #list-pane { display: none; }
+/* En plein écran, on cache la topbar + la stats bar pour libérer l'espace
+   de lecture. L'utilisateur sort du plein écran (⛶) pour les retrouver. */
+body.fullscreen-panel #topbar { display: none; }
+body.fullscreen-panel #stats { display: none; }
 #list-pane {
   background: var(--card); border-right: 1px solid var(--border);
   overflow-y: auto; min-height: 0;
@@ -460,12 +464,19 @@ body.fullscreen-panel .md-textarea {
 }
 .fullcontent-head .title { flex: 1; font-weight: 600; }
 .fullcontent {
-  padding: 22px 26px;
+  width: 100%; padding: 22px 26px;
   font-family: var(--mono); font-size: 13px; line-height: 1.75;
   color: var(--ink); white-space: pre-wrap; word-break: break-word;
   background: var(--paper);
-  /* Pas de max-height : on scrolle la page, pas une fenêtre interne. */
+  /* Textarea : pas de bordure (le wrap autour en a déjà une), pas de scroll
+     interne (auto-grow), le panneau scroll naturellement. */
+  border: none; outline: none; resize: none;
+  field-sizing: content;
+  min-height: 200px;
+  font-feature-settings: "liga" 0;
 }
+.fullcontent:focus { box-shadow: inset 0 0 0 2px var(--accent-soft); }
+.fullcontent.edited { background: #fffef5; }
 
 /* Meta footer */
 .meta-foot {
@@ -547,10 +558,13 @@ body.mode-md #list-pane .group-head h2 {
   font-size: 13.5px;
 }
 .md-textarea {
-  width: 100%; min-height: 60vh; padding: 16px 20px;
+  width: 100%; padding: 16px 20px;
   font-family: var(--mono); font-size: 13px; line-height: 1.65;
   border: 1px solid var(--border); border-radius: 8px;
-  background: var(--paper); color: var(--ink); resize: vertical;
+  background: var(--paper); color: var(--ink); resize: none;
+  /* Auto-grow : pas de scroll interne, le panneau scroll. */
+  field-sizing: content;
+  min-height: 200px;
 }
 .md-textarea:focus { outline: none; border-color: var(--accent); }
 .md-modified-flag {
@@ -819,9 +833,6 @@ body.mode-md #list-pane .group-head h2 {
 "use strict";
 
 const LS_KEY = "skill-hub-v2-state-v1";
-// Recommandations pré-remplies (optionnel) — clé = "<repo-slug>::<skill-dir-name>".
-// Affichées en badge 💡 sur le skill ; l'utilisateur reste libre d'accepter ou non.
-// Édite cet objet si tu veux pré-remplir des recos pour TES skills.
 const RECOS = {
   // Exemple :
   // "my-project::old-skill": { action: "archive", reason: "remplacé par /new-skill" },
@@ -834,8 +845,9 @@ let state = {
   axis: "repo",         // 'repo' | 'usage'
   search: "",
   filters: { repo: [], usage: [], scope: [], decision: [] },
-  decisions: {},        // key -> { action, target, targets[] }
-  mdEdits: {},          // path -> { new_content, edited_at }
+  decisions: {},        // key -> { action, target, targets[], comment }
+  skillEdits: {},       // key -> { new_content, edited_at, previous_size, new_size }
+  mdEdits: {},          // path -> { new_content, edited_at, previous_size, new_size }
   collapsed: { skills: {}, md: {} },
   selected: null,       // key (repo::dir_name) for skills, path for md
   fullscreen: false
@@ -851,6 +863,7 @@ function loadState() {
     if (!state.collapsed.skills) state.collapsed.skills = {};
     if (!state.collapsed.md) state.collapsed.md = {};
     if (!state.decisions) state.decisions = {};
+    if (!state.skillEdits) state.skillEdits = {};
     if (!state.mdEdits) state.mdEdits = {};
   } catch(e) {}
 }
@@ -956,9 +969,9 @@ function bindUI() {
   document.getElementById("drawer-export-skills").onclick = exportSkillsOnly;
   document.getElementById("drawer-export-md").onclick = exportMdAll;
   document.getElementById("btn-reset").onclick = () => {
-    const n = Object.keys(state.decisions).length + Object.keys(state.mdEdits).length;
+    const n = Object.keys(state.decisions).length + Object.keys(state.skillEdits).length + Object.keys(state.mdEdits).length;
     if (n && !confirm("Effacer les " + n + " modification(s) en cours ?")) return;
-    state.decisions = {}; state.mdEdits = {}; state.selected = null;
+    state.decisions = {}; state.skillEdits = {}; state.mdEdits = {}; state.selected = null;
     saveState(); render();
   };
   document.getElementById("btn-drawer").onclick = () => openDrawer(true);
@@ -1194,6 +1207,7 @@ function makeRow(s) {
   const hasReco = !!RECOS[k];
   const entry = state.decisions[k];
   const hasNote = entry && entry.comment && entry.comment.trim();
+  const hasEdit = !!state.skillEdits[k];
   const r = document.createElement("div");
   r.className = "row" + (dec ? " d-" + dec : "") + (sel ? " selected" : "");
   r.dataset.k = k;
@@ -1211,6 +1225,7 @@ function makeRow(s) {
     +     (hasReco ? '<span class="row-mark reco" title="Recommandation pré-remplie">💡</span>' : '')
     +     (isDup ? '<span class="row-mark dup" title="Doublon — ce nom existe dans plusieurs dépôts">⧉</span>' : '')
     +     (hasNote ? '<span class="row-mark" title="Tu as écrit une note sur ce skill">📝</span>' : '')
+    +     (hasEdit ? '<span class="row-mark" style="color:var(--accent)" title="SKILL.md modifié">●</span>' : '')
     +   '</div>'
     +   '<div class="row-line2">'
     +     '<span class="row-desc">' + esc(descOf(s)) + '</span>'
@@ -1315,15 +1330,19 @@ function renderSkillDetail() {
     html += '</div></div>';
   }
 
-  // FULL CONTENT — DÉPLIÉ PAR DÉFAUT
+  // FULL CONTENT — DÉPLIÉ PAR DÉFAUT, ÉDITABLE
+  const skillEdit = state.skillEdits && state.skillEdits[k];
+  const currentSkillContent = skillEdit ? skillEdit.new_content : (s.full_content || "");
+  const isSkillEdited = !!skillEdit;
   html += '<div class="detail-section">';
-  html +=   '<h3>Contenu complet du SKILL.md (' + (s.lines || "?") + ' lignes)</h3>';
+  html +=   '<h3>Contenu du SKILL.md (' + (s.lines || "?") + ' lignes' + (isSkillEdited ? ' · ● modifié' : '') + ') — éditable</h3>';
   html +=   '<div class="fullcontent-wrap">';
   html +=     '<div class="fullcontent-head">';
-  html +=       '<span class="title">SKILL.md</span>';
+  html +=       '<span class="title">SKILL.md' + (isSkillEdited ? ' · <span style="color:var(--accent)">modifié</span>' : '') + '</span>';
+  html +=       (isSkillEdited ? '<button class="icon-btn" id="d-revert-skill" title="Annuler les modifications" style="margin-right:4px">↺</button>' : '');
   html +=       '<button class="icon-btn" id="d-copy" title="Copier dans le presse-papier">⧉</button>';
   html +=     '</div>';
-  html +=     '<div class="fullcontent" id="d-fullcontent">' + esc(s.full_content || "(vide)") + '</div>';
+  html +=     '<textarea class="fullcontent' + (isSkillEdited ? ' edited' : '') + '" id="d-fullcontent" spellcheck="false">' + esc(currentSkillContent) + '</textarea>';
   html +=   '</div>';
   html +=   '<button class="copy-big" id="d-copy-bottom" title="Copier le contenu complet du SKILL.md">📋 Copier le contenu complet</button>';
   html += '</div>';
@@ -1425,12 +1444,38 @@ function bindDetailEvents(s, dec, otherTargets, recoData) {
   });
   const cpy = document.getElementById("d-copy");
   if (cpy) cpy.onclick = () => {
-    navigator.clipboard.writeText(s.full_content || "").then(() => toast("Contenu copié"));
+    const fc = document.getElementById("d-fullcontent");
+    navigator.clipboard.writeText(fc ? fc.value : (s.full_content || "")).then(() => toast("Contenu copié"));
   };
   const cpyB = document.getElementById("d-copy-bottom");
   if (cpyB) cpyB.onclick = () => {
-    navigator.clipboard.writeText(s.full_content || "").then(() => toast("Contenu SKILL.md copié dans le presse-papier"));
+    const fc = document.getElementById("d-fullcontent");
+    navigator.clipboard.writeText(fc ? fc.value : (s.full_content || "")).then(() => toast("Contenu SKILL.md copié dans le presse-papier"));
   };
+  // Édition SKILL.md inline : changement détecté → store edit, sinon delete.
+  const fc = document.getElementById("d-fullcontent");
+  if (fc) {
+    fc.oninput = () => {
+      const val = fc.value;
+      const orig = s.full_content || "";
+      if (val === orig) {
+        delete state.skillEdits[k];
+        fc.classList.remove("edited");
+      } else {
+        state.skillEdits[k] = {
+          new_content: val,
+          edited_at: new Date().toISOString(),
+          previous_size: orig.length,
+          new_size: val.length
+        };
+        fc.classList.add("edited");
+      }
+      saveState();
+      renderStats();
+    };
+  }
+  const rs = document.getElementById("d-revert-skill");
+  if (rs) rs.onclick = () => { delete state.skillEdits[k]; saveState(); renderSkillDetail(); toast("Modifications SKILL.md annulées"); };
 }
 
 // ============ CLAUDE.MD MODE ============
@@ -1546,8 +1591,9 @@ function renderMdDetail() {
 function renderStats() {
   const actionCount = Object.values(state.decisions).filter(d => d.action).length;
   const noteCount = Object.values(state.decisions).filter(d => !d.action && d.comment && d.comment.trim()).length;
+  const skillEditCount = Object.keys(state.skillEdits).length;
   const mdCount = Object.keys(state.mdEdits).length;
-  const totalExportable = actionCount + noteCount + mdCount;
+  const totalExportable = actionCount + noteCount + skillEditCount + mdCount;
   document.getElementById("stat-total").textContent = state.view === "skills" ? SKILLS.length : MD_FILES.length;
   let decLabel = actionCount + " décision" + (actionCount > 1 ? "s" : "");
   if (noteCount) decLabel += " · " + noteCount + " note" + (noteCount > 1 ? "s" : "");
@@ -1564,12 +1610,11 @@ function renderStats() {
     const pct = MD_FILES.length ? (mdCount / MD_FILES.length) * 100 : 0;
     document.getElementById("progress-fill").style.width = pct + "%";
   }
-  const skillCount = actionCount + noteCount;
+  const skillCount = actionCount + noteCount + skillEditCount;
   document.getElementById("btn-export").disabled = totalExportable === 0;
   document.getElementById("drawer-export-all").disabled = totalExportable === 0;
   document.getElementById("drawer-export-skills").disabled = skillCount === 0;
   document.getElementById("drawer-export-md").disabled = mdCount === 0;
-  // Désactive aussi les items du menu déroulant selon ce qui est exportable.
   const m = document.getElementById("export-menu");
   if (m) {
     m.querySelector('[data-mode="all"]').disabled = totalExportable === 0;
@@ -1593,7 +1638,8 @@ function renderDrawer() {
     else if (!d.action && d.comment && d.comment.trim()) groups.note.push({ k, d });
   });
   const mdEdited = Object.keys(state.mdEdits);
-  const total = Object.values(groups).reduce((a, g) => a + g.length, 0) + mdEdited.length;
+  const skillEditedCount = Object.keys(state.skillEdits).length;
+  const total = Object.values(groups).reduce((a, g) => a + g.length, 0) + mdEdited.length + skillEditedCount;
   if (total === 0) {
     body.innerHTML = '<div class="empty-state" style="padding:40px 18px"><div style="font-size:14px">Aucune décision</div><div class="hint">Tes choix et notes apparaîtront ici. Tu pourras alors les exporter.</div></div>';
     return;
@@ -1636,6 +1682,33 @@ function renderDrawer() {
     });
     body.appendChild(div);
   });
+  // Section SKILL.md modifiés (édits inline)
+  const skillEdited = Object.keys(state.skillEdits);
+  if (skillEdited.length) {
+    const div = document.createElement("div");
+    div.className = "drawer-section";
+    div.innerHTML = '<h3>SKILL.md modifiés <span class="ct">' + skillEdited.length + '</span></h3>';
+    skillEdited.forEach(k => {
+      const s = SKILLS.find(x => keyOf(x) === k); if (!s) return;
+      const item = document.createElement("div");
+      item.className = "drawer-item act-store";
+      item.innerHTML = '<div class="strip"></div>'
+        + '<div class="drawer-item-body"><div class="drawer-item-name">' + esc(s.name || s.dir_name) + '</div><div class="drawer-item-meta">' + esc(s.repo) + '</div></div>'
+        + '<div class="drawer-item-x" title="Annuler">×</div>';
+      item.onclick = (e) => {
+        if (e.target.closest(".drawer-item-x")) {
+          delete state.skillEdits[k];
+          saveState(); render();
+        } else {
+          state.view = "skills"; state.selected = k; document.body.classList.add("detail-open");
+          document.querySelectorAll("#mode-toggle button").forEach(x => x.classList.toggle("active", x.dataset.mode === "skills"));
+          saveState(); render(); openDrawer(false);
+        }
+      };
+      div.appendChild(item);
+    });
+    body.appendChild(div);
+  }
   if (mdEdited.length) {
     const div = document.createElement("div");
     div.className = "drawer-section";
@@ -1692,6 +1765,22 @@ function buildSkillsDecisions() {
   });
   return out;
 }
+function buildSkillsEdits() {
+  return Object.keys(state.skillEdits).map(k => {
+    const s = SKILLS.find(x => keyOf(x) === k); if (!s) return null;
+    const e = state.skillEdits[k];
+    return {
+      dir_name: s.dir_name,
+      name: s.name || s.dir_name,
+      current_repo: s.repo,
+      current_path: s.path,
+      new_content: e.new_content,
+      edited_at: e.edited_at,
+      previous_size: e.previous_size,
+      new_size: e.new_size
+    };
+  }).filter(Boolean);
+}
 function buildMdEdits(filterPath) {
   const paths = filterPath ? (state.mdEdits[filterPath] ? [filterPath] : []) : Object.keys(state.mdEdits);
   return paths.map(path => {
@@ -1707,13 +1796,14 @@ function buildMdEdits(filterPath) {
     };
   });
 }
-function triggerDownload(filenameSuffix, skills_decisions, claude_md_edits) {
+function triggerDownload(filenameSuffix, skills_decisions, skills_edits, claude_md_edits) {
   const out = {
     source: "skills-marketplace",
     exported_at: new Date().toISOString(),
     repos_known: REPOS.map(r => ({ slug: r.slug, path: r.path })),
-    _note: "Format compatible apply_changes.py. action 'store' = mv vers <repo>/.claude/skills-store/. action 'note' = annotation seule.",
+    _note: "Format compatible apply_changes.py. skills_edits[] = SKILL.md modifié inline (write new_content). action 'store' = mv vers <repo>/.claude/skills-store/. action 'note' = annotation seule.",
     skills_decisions,
+    skills_edits,
     claude_md_edits
   };
   const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
@@ -1724,21 +1814,23 @@ function triggerDownload(filenameSuffix, skills_decisions, claude_md_edits) {
 }
 function exportAll() {
   const sd = buildSkillsDecisions();
+  const se = buildSkillsEdits();
   const md = buildMdEdits();
-  if (!sd.length && !md.length) { toast("Rien à exporter — aucune décision ni édition."); return; }
-  triggerDownload("all", sd, md);
-  toast(sd.length + " décision(s) skills + " + md.length + " CLAUDE.md exportés (tout)");
+  if (!sd.length && !se.length && !md.length) { toast("Rien à exporter — aucune décision ni édition."); return; }
+  triggerDownload("all", sd, se, md);
+  toast(sd.length + " décision(s) + " + se.length + " SKILL.md modifié(s) + " + md.length + " CLAUDE.md exportés (tout)");
 }
 function exportSkillsOnly() {
   const sd = buildSkillsDecisions();
-  if (!sd.length) { toast("Aucune décision skills à exporter."); return; }
-  triggerDownload("skills", sd, []);
-  toast(sd.length + " décision(s) skills exportées (sans CLAUDE.md)");
+  const se = buildSkillsEdits();
+  if (!sd.length && !se.length) { toast("Aucune décision/édition skill à exporter."); return; }
+  triggerDownload("skills", sd, se, []);
+  toast(sd.length + " décision(s) + " + se.length + " édition(s) SKILL.md exportées (sans CLAUDE.md)");
 }
 function exportMdAll() {
   const md = buildMdEdits();
   if (!md.length) { toast("Aucun CLAUDE.md modifié à exporter."); return; }
-  triggerDownload("claudemd", [], md);
+  triggerDownload("claudemd", [], [], md);
   toast(md.length + " CLAUDE.md exporté(s) (sans skills)");
 }
 function exportMdOne(path) {
@@ -1746,7 +1838,7 @@ function exportMdOne(path) {
   if (!md.length) { toast("Ce CLAUDE.md n'a pas été modifié."); return; }
   const f = MD_FILES.find(x => x.path === path);
   const short = (f ? f.repo : "file");
-  triggerDownload("claudemd-" + short, [], md);
+  triggerDownload("claudemd-" + short, [], [], md);
   toast("CLAUDE.md " + short + " exporté seul");
 }
 // Backward-compat (un alias pour les handlers existants) :
