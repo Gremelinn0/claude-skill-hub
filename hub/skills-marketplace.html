@@ -193,10 +193,18 @@ body { display: flex; flex-direction: column; }
 body.detail-open #body { grid-template-columns: 320px 1fr; }
 body.fullscreen-panel #body { grid-template-columns: 1fr; }
 body.fullscreen-panel #list-pane { display: none; }
-/* En plein écran, on cache la topbar + la stats bar pour libérer l'espace
-   de lecture. L'utilisateur sort du plein écran (⛶) pour les retrouver. */
-body.fullscreen-panel #topbar { display: none; }
-body.fullscreen-panel #stats { display: none; }
+/* Topbar + stats bar cachés :
+   - Toujours en mode plein écran (C) : libère 100% de la hauteur.
+   - Au scroll dans le détail (B ou C, skills ou CLAUDE.md) : le bandeau
+     disparaît dès qu'on commence à scroller pour libérer l'espace de
+     lecture. Réapparaît quand on remonte près du haut.
+   - Reste visible en mode A (liste plein écran, pas de sélection). */
+body.fullscreen-panel #topbar,
+body.fullscreen-panel #stats,
+body.detail-open.scrolled-detail #topbar,
+body.detail-open.scrolled-detail #stats {
+  display: none;
+}
 #list-pane {
   background: var(--card); border-right: 1px solid var(--border);
   overflow-y: auto; min-height: 0;
@@ -778,7 +786,7 @@ body.mode-md #list-pane .group-head h2 {
   </div>
   <div id="stats-actions">
     <button class="btn" id="btn-collapse-all">Tout replier</button>
-    <button class="btn" id="btn-drawer">Décisions (<span id="stat-drawer">0</span>)</button>
+    <button class="btn btn-primary" id="btn-drawer" style="background:var(--accent);border-color:var(--accent);">Décisions (<span id="stat-drawer">0</span>)</button>
     <button class="btn" id="btn-reset">Réinitialiser</button>
     <div class="export-menu-wrap">
       <button class="btn btn-primary" id="btn-export" disabled>Exporter ▾</button>
@@ -833,6 +841,8 @@ body.mode-md #list-pane .group-head h2 {
 "use strict";
 
 const LS_KEY = "skill-hub-v2-state-v1";
+// Recommandations pré-remplies (optionnel) — clé = "<repo-slug>::<skill-dir-name>".
+// Affichées en badge 💡 sur le skill ; l'utilisateur reste libre d'accepter ou non.
 const RECOS = {
   // Exemple :
   // "my-project::old-skill": { action: "archive", reason: "remplacé par /new-skill" },
@@ -873,7 +883,7 @@ function closeDetail() {
   // Mode A : liste seule, panneau fermé. Sort aussi du plein écran s'il était actif.
   state.selected = null;
   state.fullscreen = false;
-  document.body.classList.remove("detail-open", "fullscreen-panel");
+  document.body.classList.remove("detail-open", "fullscreen-panel", "scrolled-detail");
   saveState(); render();
 }
 function toggleFullscreen() {
@@ -895,15 +905,9 @@ function decisionOf(key) {
   return d.action;
 }
 
-// Charge un JSON avec fallback sur sa version d'exemple (.example.json).
-// Permet à un visiteur du repo public d'ouvrir la page sans avoir tourné les
-// generate_*.py scripts — il voit l'UI fonctionner avec des données factices.
 async function loadJsonOrExample(baseName, fallbackValue) {
   for (const url of [baseName + ".json", baseName + ".example.json"]) {
-    try {
-      const r = await fetch(url);
-      if (r.ok) return await r.json();
-    } catch (e) {}
+    try { const r = await fetch(url); if (r.ok) return await r.json(); } catch (e) {}
   }
   return fallbackValue;
 }
@@ -977,6 +981,15 @@ function bindUI() {
   document.getElementById("btn-drawer").onclick = () => openDrawer(true);
   document.getElementById("drawer-close").onclick = () => openDrawer(false);
   document.getElementById("drawer-overlay").onclick = () => openDrawer(false);
+  // Au scroll du panneau de détail, cache la topbar + stats bar (mode B et C, skills et CLAUDE.md).
+  // Visible toujours quand on est en mode A (liste seule, pas de sélection).
+  const detailPane = document.getElementById("detail-pane");
+  if (detailPane) {
+    detailPane.addEventListener("scroll", () => {
+      const sc = detailPane.scrollTop > 30;
+      document.body.classList.toggle("scrolled-detail", sc);
+    });
+  }
   // Click outside to close filter popovers AND export menu
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".filter-popover") && !e.target.closest(".filter-cluster-add")) {
