@@ -700,6 +700,27 @@ body.mode-md #list-pane .group-head h2 {
 }
 .comment-block textarea:focus { outline: none; border-color: var(--accent); }
 
+/* ===== EXPORT DROPDOWN MENU ===== */
+.export-menu-wrap { position: relative; display: inline-block; }
+.export-menu {
+  position: absolute; top: calc(100% + 5px); right: 0;
+  background: var(--paper); border: 1px solid var(--border-warm);
+  border-radius: 8px; box-shadow: var(--shadow-lg);
+  padding: 4px; min-width: 260px; z-index: 30;
+  display: none;
+}
+.export-menu.open { display: block; }
+.export-menu-item {
+  display: flex; align-items: baseline; gap: 10px;
+  width: 100%; padding: 8px 12px; background: transparent; border: none;
+  text-align: left; cursor: pointer; border-radius: 5px;
+  font-family: inherit; font-size: 13px; color: var(--ink);
+}
+.export-menu-item:hover:not(:disabled) { background: var(--accent-soft); }
+.export-menu-item:disabled { opacity: 0.4; cursor: default; }
+.export-menu-item .lbl { font-weight: 700; flex-shrink: 0; }
+.export-menu-item .hint { color: var(--muted); font-size: 11.5px; font-weight: 500; }
+
 /* ===== COPY BUTTON BIG ===== */
 .copy-big {
   display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -745,7 +766,23 @@ body.mode-md #list-pane .group-head h2 {
     <button class="btn" id="btn-collapse-all">Tout replier</button>
     <button class="btn" id="btn-drawer">Décisions (<span id="stat-drawer">0</span>)</button>
     <button class="btn" id="btn-reset">Réinitialiser</button>
-    <button class="btn btn-primary" id="btn-export" disabled>Exporter</button>
+    <div class="export-menu-wrap">
+      <button class="btn btn-primary" id="btn-export" disabled>Exporter ▾</button>
+      <div class="export-menu" id="export-menu">
+        <button data-mode="all" class="export-menu-item">
+          <span class="lbl">Tout</span>
+          <span class="hint">skills + CLAUDE.md</span>
+        </button>
+        <button data-mode="skills" class="export-menu-item">
+          <span class="lbl">Skills uniquement</span>
+          <span class="hint">sans CLAUDE.md</span>
+        </button>
+        <button data-mode="md" class="export-menu-item">
+          <span class="lbl">CLAUDE.md uniquement</span>
+          <span class="hint">sans skills</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -899,7 +936,22 @@ function bindUI() {
   const search = document.getElementById("search");
   search.value = state.search || "";
   search.oninput = () => { state.search = search.value; saveState(); render(); };
-  document.getElementById("btn-export").onclick = exportAll;
+  // Bouton "Exporter ▾" = ouvre le menu déroulant.
+  document.getElementById("btn-export").onclick = (e) => {
+    e.stopPropagation();
+    const m = document.getElementById("export-menu");
+    document.querySelectorAll(".filter-popover.open").forEach(p => p.classList.remove("open"));
+    m.classList.toggle("open");
+  };
+  document.querySelectorAll(".export-menu-item").forEach(b => {
+    b.onclick = () => {
+      document.getElementById("export-menu").classList.remove("open");
+      const m = b.dataset.mode;
+      if (m === "all") exportAll();
+      else if (m === "skills") exportSkillsOnly();
+      else if (m === "md") exportMdAll();
+    };
+  });
   document.getElementById("drawer-export-all").onclick = exportAll;
   document.getElementById("drawer-export-skills").onclick = exportSkillsOnly;
   document.getElementById("drawer-export-md").onclick = exportMdAll;
@@ -912,10 +964,14 @@ function bindUI() {
   document.getElementById("btn-drawer").onclick = () => openDrawer(true);
   document.getElementById("drawer-close").onclick = () => openDrawer(false);
   document.getElementById("drawer-overlay").onclick = () => openDrawer(false);
-  // Click outside to close any open filter popover
+  // Click outside to close filter popovers AND export menu
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".filter-popover") && !e.target.closest(".filter-cluster-add")) {
       document.querySelectorAll(".filter-popover.open").forEach(p => p.classList.remove("open"));
+    }
+    if (!e.target.closest(".export-menu") && !e.target.closest("#btn-export")) {
+      const m = document.getElementById("export-menu");
+      if (m) m.classList.remove("open");
     }
   });
   document.getElementById("btn-collapse-all").onclick = () => {
@@ -1181,9 +1237,9 @@ function renderSkillDetail() {
   let html = '';
   html += '<div class="detail-header">';
   html +=   '<div class="detail-bar">';
-  html +=     '<button class="icon-btn back" id="d-back" title="Retour à la liste">←</button>';
   html +=     '<div class="detail-name">' + esc(s.name || s.dir_name) + '</div>';
-  html +=     '<button class="icon-btn" id="d-fullscreen" title="' + (fs ? "Quitter le plein écran" : "Plein écran") + '">' + (fs ? '⛶' : '⛶') + '</button>';
+  html +=     '<button class="icon-btn" id="d-fullscreen" title="' + (fs ? "Quitter le plein écran" : "Plein écran") + '">⛶</button>';
+  html +=     '<button class="icon-btn back" id="d-back" title="Fermer le panneau">×</button>';
   html +=   '</div>';
   html +=   '<div class="detail-badges">';
   html +=     '<span class="badge repo">' + esc(s.repo) + '</span>';
@@ -1435,8 +1491,11 @@ function renderMdDetail() {
   const edited = state.mdEdits[path];
   const cur = edited ? edited.new_content : (f.full_content || "");
   let html = '<div class="detail-header">';
-  html += '<div class="detail-bar"><button class="icon-btn back" id="d-back">←</button><div class="detail-name">' + esc((f.path || "").split(/[\\\/]/).slice(-2).join("/")) + '</div>'
-    + '<button class="icon-btn" id="d-fullscreen" title="Plein écran">⛶</button></div>';
+  html += '<div class="detail-bar">'
+    + '<div class="detail-name">' + esc((f.path || "").split(/[\\\/]/).slice(-2).join("/")) + '</div>'
+    + '<button class="icon-btn" id="d-fullscreen" title="Plein écran">⛶</button>'
+    + '<button class="icon-btn back" id="d-back" title="Fermer le panneau">×</button>'
+    + '</div>';
   html += '<div class="detail-badges"><span class="badge repo">' + esc(f.repo) + '</span><span class="badge">' + (f.lines || 0) + ' lignes</span>' + (edited ? '<span class="md-modified-flag">● modifié — non sauvegardé</span>' : '') + '</div>';
   html += '</div>';
   html += '<div class="detail-body">';
@@ -1510,6 +1569,13 @@ function renderStats() {
   document.getElementById("drawer-export-all").disabled = totalExportable === 0;
   document.getElementById("drawer-export-skills").disabled = skillCount === 0;
   document.getElementById("drawer-export-md").disabled = mdCount === 0;
+  // Désactive aussi les items du menu déroulant selon ce qui est exportable.
+  const m = document.getElementById("export-menu");
+  if (m) {
+    m.querySelector('[data-mode="all"]').disabled = totalExportable === 0;
+    m.querySelector('[data-mode="skills"]').disabled = skillCount === 0;
+    m.querySelector('[data-mode="md"]').disabled = mdCount === 0;
+  }
 }
 
 // ============ DRAWER ============
