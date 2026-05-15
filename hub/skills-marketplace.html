@@ -845,13 +845,25 @@ function decisionOf(key) {
   return d.action;
 }
 
+// Charge un JSON avec fallback sur sa version d'exemple (.example.json).
+// Permet à un visiteur du repo public d'ouvrir la page sans avoir tourné les
+// generate_*.py scripts — il voit l'UI fonctionner avec des données factices.
+async function loadJsonOrExample(baseName, fallbackValue) {
+  for (const url of [baseName + ".json", baseName + ".example.json"]) {
+    try {
+      const r = await fetch(url);
+      if (r.ok) return await r.json();
+    } catch (e) {}
+  }
+  return fallbackValue;
+}
 async function init() {
   loadState();
   try {
     const [sd, um, md] = await Promise.all([
-      fetch("skills-data.json").then(r => r.json()),
-      fetch("skills-usage-map.json").then(r => r.json()).catch(() => ({ map: {}, categories_order: [] })),
-      fetch("claude-md-data.json").then(r => r.json()).catch(() => ({ files: [], repos: [] }))
+      loadJsonOrExample("skills-data", { skills: [], repos: [] }),
+      loadJsonOrExample("skills-usage-map", { map: {}, categories_order: [] }),
+      loadJsonOrExample("claude-md-data", { files: [], repos: [] })
     ]);
     SKILLS = sd.skills || [];
     REPOS = sd.repos || [];

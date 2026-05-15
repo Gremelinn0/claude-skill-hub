@@ -1,0 +1,48 @@
+{
+  "_comment": "Fichier d'exemple servi en démo quand claude-md-data.json n'existe pas. Remplacé par les vraies données dès que tu exécutes 'python tools/generate_claude_md_index.py'.",
+  "generated_at": "2026-05-15T00:00:00+00:00",
+  "counts": {
+    "total": 2,
+    "global": 1,
+    "projet": 1,
+    "repos": { "global": 1, "my-project": 1 }
+  },
+  "repos": [
+    { "slug": "global", "path": "~/.claude", "count": 1 },
+    { "slug": "my-project", "path": "PROJECTS/my-project", "count": 1 }
+  ],
+  "files": [
+    {
+      "repo": "global",
+      "repo_path": "~/.claude",
+      "scope": "global",
+      "path": "/home/user/.claude/CLAUDE.md",
+      "size": 420,
+      "lines": 18,
+      "last_modified": "2026-05-15T00:00:00+00:00",
+      "last_commit_hash": "a1b2c3d",
+      "full_content": "# Préférences globales\n\nDes règles qui s'appliquent à toutes mes sessions Claude Code, quel que soit le projet.\n\n## Ton\n\n- Direct, factuel. Pas de surcouche \"happy to help\".\n- Réponses courtes par défaut. Détailler à la demande.\n\n## Workflow\n\n- Avant d'écrire du code, expliquer en 1-2 phrases l'approche.\n- Après un changement non trivial, lancer les tests.\n- Pas de commit sans demande explicite.\n",
+      "sections": [
+        { "level": 1, "title": "Préférences globales", "line": 1 },
+        { "level": 2, "title": "Ton", "line": 5 },
+        { "level": 2, "title": "Workflow", "line": 10 }
+      ]
+    },
+    {
+      "repo": "my-project",
+      "repo_path": "PROJECTS/my-project",
+      "scope": "projet",
+      "path": "/home/user/PROJECTS/my-project/CLAUDE.md",
+      "size": 380,
+      "lines": 16,
+      "last_modified": "2026-05-15T00:00:00+00:00",
+      "last_commit_hash": "e4f5g6h",
+      "full_content": "# my-project\n\nApp web Next.js + Postgres. Quelques règles spécifiques à ce projet.\n\n## Stack\n\n- Frontend : Next.js 14, Tailwind, shadcn/ui.\n- Backend : Hono sur Vercel Edge, Drizzle ORM, Postgres (Neon).\n- Tests : vitest + Playwright.\n\n## Conventions\n\n- Pas d'`any` en TypeScript — préférer `unknown` + narrowing.\n- Tous les composants UI vont dans `components/ui/`.\n- Migrations Drizzle commitées dans `drizzle/`.\n",
+      "sections": [
+        { "level": 1, "title": "my-project", "line": 1 },
+        { "level": 2, "title": "Stack", "line": 5 },
+        { "level": 2, "title": "Conventions", "line": 11 }
+      ]
+    }
+  ]
+}

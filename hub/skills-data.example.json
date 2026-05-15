@@ -1,0 +1,112 @@
+{
+  "_comment": "Fichier d'exemple servi en démo quand skills-data.json n'existe pas. Remplacé par les vraies données dès que tu exécutes 'python tools/generate_skills_index.py'.",
+  "generated_at": "2026-05-15T00:00:00+00:00",
+  "counts": {
+    "global": 3,
+    "projet": 4,
+    "total": 7,
+    "repos": {
+      "global": 3,
+      "my-project": 3,
+      "side-project": 1
+    }
+  },
+  "repos": [
+    { "slug": "global", "path": "~/.claude/skills", "count": 3 },
+    { "slug": "my-project", "path": "PROJECTS/my-project", "count": 3 },
+    { "slug": "side-project", "path": "PROJECTS/side-project", "count": 1 }
+  ],
+  "skills": [
+    {
+      "name": "hello-world",
+      "dir_name": "hello-world",
+      "description": "Skill d'exemple — affiche un message d'accueil et démontre la structure minimale d'un SKILL.md avec frontmatter.",
+      "summary": "Skill minimal pour comprendre comment Claude Code charge un skill. Contient un frontmatter avec name + description, puis un body Markdown libre qui sert de documentation et de prompt système quand le skill est invoqué.",
+      "full_content": "---\nname: hello-world\ndescription: Skill d'exemple — affiche un message d'accueil et démontre la structure minimale d'un SKILL.md avec frontmatter.\n---\n\n# Hello World\n\nC'est un skill d'exemple pour le hub. Il sert juste à montrer comment un SKILL.md est structuré :\n\n- Un frontmatter YAML entre `---` ... `---` au tout début, avec au minimum `name` et `description`.\n- Un body Markdown libre en-dessous, qui sert à la fois de doc et de prompt système quand le skill est invoqué.\n\n## Quand l'utiliser\n\nQuand quelqu'un dit \"hello\" ou \"bonjour\".\n\n## Quoi faire\n\nRépondre par un message d'accueil chaleureux.\n",
+      "scope": "global",
+      "repo": "global",
+      "repo_path": "~/.claude/skills",
+      "path": "/home/user/.claude/skills/hello-world/SKILL.md",
+      "lines": 18,
+      "last_commit_hash": "a1b2c3d"
+    },
+    {
+      "name": "doc-writer",
+      "dir_name": "doc-writer",
+      "description": "Génère de la documentation technique structurée à partir d'un brief court — README, API docs, runbooks. Output Markdown.",
+      "summary": "Skill généraliste de rédaction technique. Prend un brief court (\"écris un README pour ce projet Python\") et produit un document structuré en Markdown avec les sections attendues du genre demandé.",
+      "full_content": "---\nname: doc-writer\ndescription: Génère de la documentation technique structurée à partir d'un brief court — README, API docs, runbooks. Output Markdown.\n---\n\n# Doc Writer\n\nSkill pour rédiger rapidement de la doc technique propre.\n\n## Inputs attendus\n\n- Le type de document (README, API docs, runbook, post-mortem...).\n- Un brief court : 2-3 phrases sur le sujet, le public, le contexte.\n- Optionnel : exemples de docs existantes à imiter en ton.\n\n## Workflow\n\n1. Identifier le type de document → charger les sections canoniques.\n2. Poser 1-3 questions de clarification si le brief est trop maigre.\n3. Produire un draft complet en Markdown.\n4. Demander si on veut affiner une section.\n",
+      "scope": "global",
+      "repo": "global",
+      "repo_path": "~/.claude/skills",
+      "path": "/home/user/.claude/skills/doc-writer/SKILL.md",
+      "lines": 24,
+      "last_commit_hash": "e4f5g6h"
+    },
+    {
+      "name": "recap",
+      "dir_name": "recap",
+      "description": "Résume une session de travail en quelques lignes : ce qui a été fait, ce qui reste, blocages. Pas un journal — un récap actionnable.",
+      "summary": "Skill pour clore une session de travail proprement. Lit le contexte récent (commits, fichiers touchés, conversation) et produit un récap court et actionnable.",
+      "full_content": "---\nname: recap\ndescription: Résume une session de travail en quelques lignes — ce qui a été fait, ce qui reste, blocages.\n---\n\n# Recap\n\nClore une session proprement, sans tartine.\n\n## Format attendu\n\n```\n## Fait\n- ...\n\n## Reste à faire\n- ...\n\n## Blocages / à débattre\n- ... (ou \"aucun\")\n```\n\n## Règles\n\n- Pas de narration. Faits + status uniquement.\n- Mentionne les commits ou PR créés, pas les détails d'implémentation.\n- 10-15 lignes max. Si plus long, c'est qu'il faut sous-diviser la session.\n",
+      "scope": "global",
+      "repo": "global",
+      "repo_path": "~/.claude/skills",
+      "path": "/home/user/.claude/skills/recap/SKILL.md",
+      "lines": 27,
+      "last_commit_hash": "i7j8k9l"
+    },
+    {
+      "name": "test-runner",
+      "dir_name": "test-runner",
+      "description": "Lance la suite de tests du projet, lit les résultats, propose des fixes pour chaque échec. Connaît pytest, vitest, jest, go test.",
+      "summary": "Skill spécifique au projet pour piloter les tests : détecte le framework, lance la commande appropriée, parse les échecs et propose des corrections ciblées.",
+      "full_content": "---\nname: test-runner\ndescription: Lance les tests, lit les résultats, propose des fixes pour chaque échec.\n---\n\n# Test Runner\n\n## Workflow\n\n1. Détecter le framework (pytest / vitest / jest / go test) via les fichiers du projet.\n2. Lancer la commande de test appropriée.\n3. Parser les échecs.\n4. Pour chaque échec : afficher le test, l'erreur, la ligne du code testé, et proposer un fix.\n\n## Frameworks supportés\n\n- pytest (Python)\n- vitest, jest (JS/TS)\n- go test (Go)\n\nFallback : `npm test` ou `make test` si rien d'autre n'est détecté.\n",
+      "scope": "projet",
+      "repo": "my-project",
+      "repo_path": "PROJECTS/my-project",
+      "path": "/home/user/PROJECTS/my-project/.claude/skills/test-runner/SKILL.md",
+      "lines": 21,
+      "last_commit_hash": "m1n2o3p"
+    },
+    {
+      "name": "git-helper",
+      "dir_name": "git-helper",
+      "description": "Assiste pour les opérations git complexes : rebase, conflits, cherry-pick, force-push sûr. Préfère les actions réversibles.",
+      "summary": "Skill pour les opérations git non triviales. Toujours expliquer ce qui va se passer, proposer une option safe avant une option destructive, garder un filet (sauvegarde) avant les actions irréversibles.",
+      "full_content": "---\nname: git-helper\ndescription: Assiste pour les opérations git complexes — rebase, conflits, cherry-pick, force-push sûr.\n---\n\n# Git Helper\n\n## Règle d'or\n\nToujours présenter la safe option avant la destructive. Toujours créer un filet (`git tag backup-before-X`) avant un reset/force-push.\n\n## Cas typiques\n\n- **Conflit pendant un rebase** : afficher le diff, expliquer les 2 versions, demander quoi garder.\n- **Force-push** : refuser si la branche est `main` ou `master` sauf demande explicite ; toujours `--force-with-lease` jamais `--force`.\n- **Cherry-pick** : confirmer le commit, vérifier qu'il s'applique cleanly.\n",
+      "scope": "projet",
+      "repo": "my-project",
+      "repo_path": "PROJECTS/my-project",
+      "path": "/home/user/PROJECTS/my-project/.claude/skills/git-helper/SKILL.md",
+      "lines": 23,
+      "last_commit_hash": "q4r5s6t"
+    },
+    {
+      "name": "code-review",
+      "dir_name": "code-review",
+      "description": "Review d'un diff ou d'une PR — risques, bugs potentiels, suggestions, points forts. Ton constructif, pas de nitpicking gratuit.",
+      "summary": "Skill de revue de code orienté valeur. Identifie les vrais problèmes (bugs, sécurité, perf, maintenabilité), salue les bonnes idées, évite les remarques cosmétiques sauf si un linter les manque.",
+      "full_content": "---\nname: code-review\ndescription: Review d'un diff ou d'une PR — risques, bugs potentiels, suggestions, points forts.\n---\n\n# Code Review\n\n## Priorité de revue\n\n1. **Bugs réels** — logique fausse, edge cases manqués, race conditions.\n2. **Sécurité** — injections, secrets en clair, permissions trop larges.\n3. **Performance** — boucles N² évidentes, requêtes en cascade.\n4. **Maintenabilité** — couplage fort, naming flou, manque de tests.\n5. **Style** — uniquement si un linter le manquerait.\n\n## Format\n\n- Liste numérotée par priorité.\n- Pour chaque point : ligne(s) concernée(s), problème, suggestion.\n- Finir par 1-2 points forts (vrais — pas de flatterie).\n",
+      "scope": "projet",
+      "repo": "my-project",
+      "repo_path": "PROJECTS/my-project",
+      "path": "/home/user/PROJECTS/my-project/.claude/skills/code-review/SKILL.md",
+      "lines": 26,
+      "last_commit_hash": "u7v8w9x"
+    },
+    {
+      "name": "scratch-pad",
+      "dir_name": "scratch-pad",
+      "description": "Skill d'expérimentation libre — pas de contrat strict, sert juste à tester des idées dans un projet annexe.",
+      "summary": "Skill placeholder. Garde-le si tu veux un endroit pour brouillonner sans polluer tes skills principaux. Sinon, archive-le.",
+      "full_content": "---\nname: scratch-pad\ndescription: Skill d'expérimentation libre — pas de contrat strict.\n---\n\n# Scratch Pad\n\nUn endroit pour brouillonner. Pas de règle stricte.\n",
+      "scope": "projet",
+      "repo": "side-project",
+      "repo_path": "PROJECTS/side-project",
+      "path": "/home/user/PROJECTS/side-project/.claude/skills/scratch-pad/SKILL.md",
+      "lines": 8,
+      "last_commit_hash": "y0z1a2b"
+    }
+  ]
+}

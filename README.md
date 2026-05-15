@@ -2,7 +2,7 @@
 
 > Self-hosted visual hub to triage and pilot all your [Claude Code](https://docs.claude.com/en/docs/claude-code/overview) skills — across global + every project repo. Master-detail page, move/duplicate/archive/store across repos, notes per skill, CLAUDE.md editor. Bring your own skills.
 
-Live demo (mine, for reference) : [https://antigravity-master-hub.vercel.app/skills-marketplace.html](https://antigravity-master-hub.vercel.app/skills-marketplace.html)
+Open `hub/skills-marketplace.html` in any local HTTP server and you immediately see the UI running on a small set of demo skills (`*.example.json`) — no scan required. When you run the generators, your real data takes over automatically.
 
 ## Why
 
@@ -76,9 +76,11 @@ Everything via environment variables (no config file) :
 ```
 claude-skill-hub/
 ├── hub/
-│   ├── skills-marketplace.html    # the page (vanilla HTML+CSS+JS, self-contained)
-│   ├── skills-usage-map.json      # your custom usage categorization (edit me)
-│   └── vercel.json                # Vercel static hosting config
+│   ├── skills-marketplace.html         # the page (vanilla HTML+CSS+JS, self-contained)
+│   ├── skills-usage-map.json           # your custom usage categorization (edit me)
+│   ├── skills-data.example.json        # demo data, loaded if skills-data.json doesn't exist
+│   ├── claude-md-data.example.json     # demo data, loaded if claude-md-data.json doesn't exist
+│   └── vercel.json                     # Vercel static hosting config
 ├── tools/
 │   ├── generate_skills_index.py   # scans + writes skills-data.json
 │   ├── generate_claude_md_index.py # scans + writes claude-md-data.json
