@@ -1,151 +1,173 @@
 ---
 name: skill-finder-research
-description: Opérateur interne de recherche qui benchmarke en anglais les meilleurs skills externes installables et les meilleures méthodes métier à absorber dans un owner existant. À utiliser après /choisir-competence-outil-ia quand la recherche locale ne suffit pas, quand Florent demande les « meilleurs skills », ou quand un skill présent produit un résultat médiocre. Compare les sources, inspecte les fichiers réels, évalue qualité, sécurité et compatibilité, puis rend un verdict sans rien installer.
+description: Research operator that benchmarks external AI-agent skills and proven practitioner methods before adoption. Use when you need to find a missing capability, compare several candidate skills, or improve an existing workflow without blindly installing whatever is most popular.
 ---
 
 # Skill Finder Research
 
-## Rôle
+## Mission
 
-Je suis le **chercheur spécialisé** placé derrière `/choisir-competence-outil-ia`.
+Find the best existing building block for a task before creating one from scratch.
 
-- `/choisir-competence-outil-ia` reste l'unique porte humaine : il comprend le besoin, vérifie le parc local et me délègue seulement le benchmark externe.
-- Je cherche, lis, compare et teste. Je **n'installe, ne fusionne et ne modifie aucun skill**.
-- Je distingue toujours un **skill installable** d'une **méthode métier** publiée par un praticien.
-- « Meilleur » signifie : meilleur résultat attendu pour la tâche, le stack et les contraintes de Florent. Jamais « le plus de stars ».
+This skill can search for:
+- an installable skill;
+- a reusable script or workflow;
+- a proven method from a practitioner;
+- a better approach to absorb into an existing system.
 
-L'ancien `/skill-finder` archivé était une seconde porte d'entrée et une cascade de catalogues. Je ne le réactive pas : je suis un opérateur étroit, sans trigger concurrent avec le routeur.
+It does **not** install, modify, merge or publish anything. It returns a research-backed adoption decision.
 
-## Entrée minimale
+## Input
 
-Recevoir ou dériver :
+Before searching, define:
 
-1. le résultat concret attendu ;
-2. l'owner local déjà trouvé, ou la preuve qu'il manque ;
-3. l'hôte cible : Claude Code, Codex, autre agent ;
-4. les outils, permissions et formats disponibles ;
-5. les critères non négociables : langue, sécurité, coût, licence, maintenance, sortie.
+1. **Expected outcome** — what concrete result should the capability produce?
+2. **Existing capability** — what already exists locally, if anything?
+3. **Target host** — Claude Code, Codex, another agent/runtime.
+4. **Constraints** — permissions, stack, language, cost, licensing, maintenance.
+5. **Acceptance criteria** — what would make one candidate clearly better than another?
 
-Si le besoin reste vague, le reformuler comme une tâche testable avant de chercher.
+If the request is vague, rewrite it as a testable task first.
 
-## Choisir le mode
+## Choose a mode
 
-| Situation | Mode | But |
+| Situation | Mode | Goal |
 |---|---|---|
-| Aucun owner local ne couvre le geste | **INSTALLABLE** | Trouver un vrai skill externe à adopter |
-| Un owner existe mais son résultat est faible | **MÉTHODE** | Trouver des mécanismes supérieurs à intégrer à l'owner |
-| Un bon skill existe mais sa méthode doit être enrichie | **MIXTE** | Comparer artefacts et ressources, sans installer de doublon |
+| No existing capability covers the task | **INSTALLABLE** | Find a real external skill worth adopting |
+| A capability exists but performs poorly | **METHOD** | Find better mechanisms to absorb without creating a duplicate |
+| Both are relevant | **MIXED** | Compare installable artifacts and external methods |
 
-En mode MÉTHODE, commencer sur la **surface métier native** : LinkedIn pour le copywriting LinkedIn, Google Search Central pour le SEO, retours utilisateurs et données produit pour le SaaS, etc. Les marketplaces de skills ne passent pas devant les praticiens du métier.
+## Research workflow
 
-## Workflow de recherche
+### 1. Build the search brief
 
-### 1. Construire le brief de recherche en anglais
+Translate the need into precise English domain vocabulary:
+- desired output;
+- core verbs;
+- tool/runtime;
+- constraints;
+- synonyms and adjacent terminology.
 
-Traduire le besoin français en vocabulaire métier anglais : résultat, verbes, livrables, contraintes et synonymes. Garder une petite liste bilingue pour éviter les faux amis.
+Prefer search terms that describe the actual task, not only the product name.
 
-Exemple : « copywriting LinkedIn naturel » devient notamment `LinkedIn post writing`, `social copywriting`, `hook editing`, `thought leadership writing`, `human voice`, `post critique`.
+### 2. Search in evidence order
 
-### 2. Chercher dans l'ordre de preuve
+Use this priority:
 
-Lire [`references/source-registry.md`](references/source-registry.md) au démarrage d'une recherche externe.
+1. **Official sources** — vendor docs, official repositories, specifications.
+2. **Maintained collections** — reputable curators with visible authorship, history and license.
+3. **Targeted GitHub search** — open the real `SKILL.md`, scripts and references.
+4. **Marketplaces/directories** — useful for discovery, never sufficient as proof of quality.
+5. **Practitioner sources** — in METHOD mode, research the native professional surface for the domain.
 
-1. **Sources officielles** : éditeur de l'outil, dépôt officiel, spécification Agent Skills.
-2. **Collections maintenues** : organisations ou curateurs identifiables, historique et licence visibles.
-3. **Recherche GitHub ciblée** : requête anglaise, fichier `SKILL.md` réel, code et références ouverts.
-4. **Marketplaces et annuaires** : pour le rappel et les pistes, jamais comme preuve de qualité.
-5. **Surface métier native** en mode MÉTHODE : contenus complets de praticiens, études, docs officielles pour contrôler les faits.
+Always open the canonical source. A marketplace card, star count or search snippet is not enough.
 
-Toujours ouvrir la source canonique. Un titre, une carte de marketplace, un résumé de moteur ou un nombre d'installations ne suffisent pas.
+### 3. Inspect serious candidates
 
-### 3. Lire le candidat complet
+For every serious candidate, verify:
+- complete skill/instruction file;
+- source and author;
+- license;
+- last meaningful update;
+- dependencies;
+- scripts and commands;
+- network access;
+- secrets/permissions;
+- compatibility with the target runtime;
+- overlap with the existing system;
+- whether the README claims match the actual implementation.
 
-Pour chaque candidat sérieux :
+### 4. Apply hard gates before scoring
 
-- lire intégralement `SKILL.md` et les références requises pour le workflow évalué ;
-- relever source, auteur, licence, date ou dernier commit, dépendances et hôtes annoncés ;
-- vérifier les scripts, commandes, accès réseau, secrets, permissions et écritures externes ;
-- distinguer les promesses du README des comportements réellement décrits ;
-- vérifier qu'il ne recouvre pas déjà l'owner local ou un autre candidat.
+Reject a candidate before scoring if it fails any of these:
 
-### 4. Appliquer les gates puis scorer
+- **Provenance** — source cannot be traced confidently.
+- **Safety** — suspicious scripts, excessive permissions, unsafe secret handling.
+- **Compatibility** — cannot realistically run in the target environment.
+- **Structure** — the real implementation is incomplete or materially different from the advertised capability.
 
-Lire [`references/evaluation-rubric.md`](references/evaluation-rubric.md).
+For candidates that pass, score comparatively:
 
-Un candidat qui échoue à un gate de sécurité, de provenance, de structure ou de compatibilité est rejeté avant score. Pour les autres, comparer sur 100 : adéquation, procédure, vérification, maintenance, portabilité, sécurité, coût de contexte et provenance.
+| Criterion | Weight |
+|---|---:|
+| Fit to the exact task | 30 |
+| Quality of procedure / instructions | 20 |
+| Verification / testing discipline | 15 |
+| Maintenance / freshness | 10 |
+| Portability | 10 |
+| Security | 10 |
+| Context / complexity cost | 5 |
 
-Les stars, réactions, téléchargements et classements sont des signaux faibles de découverte, au mieux un départage final.
+Popularity is only a weak tie-breaker.
 
-### 5. Tester avant d'adopter
+### 5. Test when safe
 
-Quand l'installation temporaire ou l'exécution est sûre et autorisée :
+When temporary installation or execution is safe and explicitly allowed:
 
-1. faire l'inspection statique ;
-2. préparer 2 à 3 cas réels, dont un cas difficile et un cas hors périmètre ;
-3. comparer à l'owner actuel avec le même brief et les mêmes critères ;
-4. vérifier résultat, respect du périmètre, erreurs, coût de contexte et reproductibilité ;
-5. séparer **testé**, **déclaré** et **inféré**.
+1. inspect statically first;
+2. prepare 2–3 realistic cases;
+3. include one difficult case and one out-of-scope case;
+4. compare candidates with the same brief;
+5. separate **tested**, **declared** and **inferred** behavior.
 
-Sans autorisation d'installation, rendre un verdict statique explicite et la liste des tests encore nécessaires.
+If installation is not authorized, return a static assessment and list the tests still required.
 
-### 6. Rendre un verdict d'adoption
+### 6. Return one adoption verdict
 
-Un seul verdict principal :
+Choose one:
 
-- **INSTALLER** : capacité absente, candidat nettement supérieur, gates passés ;
-- **ABSORBER LA MÉTHODE** : l'owner existe et peut intégrer les mécanismes utiles ;
-- **GARDER L'EXISTANT** : aucun gain démontré ;
-- **REJETER** : risque, doublon, faiblesse ou incompatibilité ;
-- **METTRE EN VEILLE** : prometteur, mais preuve ou test insuffisant.
+- **INSTALL** — missing capability; candidate clearly passes the gates.
+- **ABSORB THE METHOD** — keep the existing capability but incorporate better mechanisms.
+- **KEEP EXISTING** — no meaningful gain demonstrated.
+- **REJECT** — risk, duplication, weak quality or incompatibility.
+- **WATCH** — promising, but not sufficiently proven yet.
 
-Je ne déclenche jamais moi-même l'étape suivante.
-
-## Articulation canonique
+## Required output
 
 ```text
-Florent
-  → /choisir-competence-outil-ia
-      → /skill-finder-research
-          → INSTALLER : skill-installer ou /skill-inventory-marketplace
-          → ABSORBER : skill-creator → /skill-factory → /skill-quality-guard
-          → DOUBLON / confusion : /skill-cleaner
-          → exposition multi-hôtes : /migration-systeme-ia
-          → inventaire final : /skill-inventory-marketplace
+Research: <need>
+Mode: <INSTALLABLE | METHOD | MIXED>
+
+Testable need:
+<one sentence>
+
+Existing capability:
+<name or none>
+
+Sources scanned:
+<official · repositories · directories · practitioner sources>
+
+Candidate | Type | Canonical source | Score | Risk | Verdict
+...
+
+Recommendation:
+<one main verdict>
+
+Why:
+- <fact 1>
+- <fact 2>
+- <fact 3>
+
+What to install or absorb:
+<precise elements>
+
+Tested / declared / inferred:
+<clear separation>
+
+Next step:
+<one concrete next action>
 ```
 
-Pour une étude de marché ou de domaine plus large qu'un benchmark de compétences, passer à `/bmad-market-research` au lieu d'élargir mon rôle.
+## Guardrails
 
-## Sortie obligatoire
+- Search in English first unless the domain requires another language.
+- Never install directly from a marketplace listing without tracing the canonical source.
+- Never execute third-party scripts before inspection.
+- Never confuse popularity with quality.
+- Avoid creating duplicate capabilities when an existing one can absorb the improvement.
+- Cite canonical sources, dates, limitations and any relevant conflicts of interest.
+- Do not mutate the user's system automatically; return a decision package first.
 
-```markdown
-🔎 Recherche « <besoin> » — mode <INSTALLABLE|MÉTHODE|MIXTE>
+## Public version note
 
-Besoin testable : <1 phrase>
-Owner actuel : <nom ou absent>
-Surfaces scannées : <officiel · dépôts · annuaires · surface métier>
-
-| Candidat / ressource | Type | Preuve lue | Score | Risque | Verdict |
-|---|---|---|---:|---|---|
-| ... | skill / méthode | URL canonique | 00/100 | faible/moyen/fort | ... |
-
-🏆 Recommandation : <un seul verdict principal>
-Pourquoi : <3 raisons factuelles maximum>
-À absorber ou installer : <éléments précis>
-Écart avec l'existant : <gain démontré>
-Testé / déclaré / inféré : <séparation explicite>
-Étape suivante : <owner exact, sans l'exécuter>
-```
-
-Toujours garder une liste scannable de 3 à 5 candidats ou expliquer franchement pourquoi il y en a moins. Chaque ligne porte une URL canonique et un verdict de pertinence.
-
-## Garde-fous
-
-- Recherche **anglais d'abord**, puis langue locale si le domaine l'exige.
-- Ne jamais installer depuis une marketplace sans remonter au dépôt ou à la source réelle.
-- Ne jamais exécuter un script tiers avant inspection et autorisation adaptées.
-- Ne jamais confondre popularité, visibilité, ancienneté ou promesse avec qualité.
-- Ne jamais créer un nouvel owner si l'existant peut absorber l'apport.
-- Ne jamais muter le parc, la marketplace ou les hôtes : rendre le dossier de décision à l'owner suivant.
-- Citer les sources, dates, limites et conflits d'intérêt éventuels.
-
-<!-- dev-qa-link: skill de recherche non logiciel ; la QA est la grille + les cas comparatifs décrits ci-dessus -->
+This file is a standalone public edition of Skill Finder Research. Internal routing, private project references and non-portable dependencies have been intentionally removed.
