@@ -1,19 +1,14 @@
 # Project Launcher — deprecated
 
-This public resource was created on **2026-09-19** by extracting a workflow that already existed in older skills.
+This resource was created on **2026-09-19** as a duplicate abstraction and should no longer be shared as a standalone skill.
 
-It is no longer the canonical resource and should not be shared as a separate skill.
+There are two distinct internal capabilities:
 
-## Use the original public skill instead
+- **Create / maintain a ChatGPT Project and its sources/context** → internal owner: `/gpt-projet`.
+- **Delegate work to an already-existing ChatGPT Project from Claude** → internal owner: `/claude-gpt`.
 
-**Claude GPT Bridge — /claude-gpt**
+These are different jobs and must not be conflated.
 
-Repository:
-https://github.com/Gremelinn0/productivity-claude-gpt-bridge
+There is currently **no validated public replacement link for the project-creation skill**. Do not redirect this resource to `/claude-gpt` and do not use this page as a lead magnet.
 
-Direct skill:
-https://github.com/Gremelinn0/productivity-claude-gpt-bridge/blob/master/skills/claude-gpt/SKILL.md
-
-The original public plugin predates Project Launcher and is specifically designed to delegate work to an existing ChatGPT project so Claude does not spend its own tokens redoing reasoning or writing that ChatGPT can handle.
-
-Project creation/maintenance is a separate concern owned internally by `/gpt-projet`.
+This file remains only as a tombstone so old links do not silently point to the wrong capability.
