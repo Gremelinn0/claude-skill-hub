@@ -170,4 +170,11 @@ Next step:
 
 ## Public version note
 
-This file is a standalone public edition of Skill Finder Research. Internal routing, private project references and non-portable dependencies have been intentionally removed.
+This file is the **official public distribution copy** of Skill Finder Research.
+
+Use this URL when sharing the resource publicly:
+https://github.com/Gremelinn0/claude-skill-hub/blob/main/resources/SKILL_FINDER_RESEARCH.md
+
+Internal repositories, archived copies and historical versions are implementation/history only and are **not public distribution links**.
+
+This standalone edition intentionally removes private routing, project-specific references and non-portable dependencies.
