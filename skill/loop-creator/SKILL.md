@@ -1,279 +1,411 @@
 ---
 name: loop-creator
 description: >-
-  Méthode publique pour créer ou réparer une boucle de travail autonome autour d'une compétence
-  existante. La boucle porte la cadence, l'état et l'arrêt ; la compétence propriétaire garde la
-  méthode métier. Utiliser quand un chantier doit avancer par reprises successives sans recopier un
-  énorme prompt à chaque tour.
-version: 0.1.0
+  Quand un utilisateur veut créer, reprendre, réparer ou optimiser une boucle autonome, une boucle
+  AutoResearch, un agent qui doit progresser par reprises successives ou un chantier qui doit continuer
+  jusqu'à un résultat mesuré → architecturer la boucle autour d'une compétence / procédure propriétaire :
+  readiness, prémortem, délégation, mesure, état, apprentissage, dry run et arrêt. Réutiliser l'existant ;
+  ne jamais recopier toute la méthode dans le prompt de reprise.
+version: 0.2.0
 status: public
 ---
 
 # Loop Creator
 
-## Le problème
+## Mission
 
-Le premier réflexe quand on veut faire travailler un agent en boucle est souvent d'écrire un gros
-prompt de reprise :
+Transformer un objectif + une compétence / procédure propriétaire en une boucle autonome qui peut :
+- reprendre sans transcript géant ;
+- savoir où elle en est ;
+- déléguer intelligemment ;
+- mesurer un vrai résultat ;
+- capitaliser ce qu'elle apprend ;
+- s'arrêter proprement.
 
-- relis ceci ;
-- fais cela ;
-- respecte ces règles ;
-- reprends à telle étape ;
-- vérifie tel test ;
-- recommence jusqu'à la fin.
+Principe :
 
-Ça fonctionne au début.
+> La méthode vit dans la compétence. La boucle organise la répétition autour d'elle.
 
-Puis la méthode évolue ailleurs et le prompt copié, lui, reste figé.
-
-Au bout de quelques semaines, la boucle rejoue proprement une version périmée du système.
-
-## Principe
-
-> **La boucle ne porte pas la méthode. Elle porte la cadence et l'état.**
-
-Séparer quatre responsabilités :
-
-1. **La compétence propriétaire** — quoi faire, comment le faire, les pièges, les tests et la définition de fini.
-2. **L'état canonique** — où le chantier en est réellement et ce qu'il reste.
-3. **Le journal** — ce qui a été tenté, mesuré, gardé ou abandonné.
-4. **La boucle** — quand reprendre, avec quelle cadence, et quand s'arrêter.
-
-Le prompt de reprise peut alors rester minuscule, parce qu'il recharge les sources actuelles au lieu
-de recopier leur contenu.
-
-## Avant de créer une boucle
-
-### 1. Chercher l'existante
-
-Même sujet + même propriétaire + même cible = **reprendre ou réparer**, jamais créer une deuxième
-boucle.
-
-Une boucle dormante reste une boucle existante.
-
-### 2. Nommer la compétence propriétaire
-
-Une boucle sans compétence propriétaire improvise sa méthode à chaque réveil.
-
-Si aucune compétence / procédure n'existe encore, la construire d'abord.
-
-### 3. Définir un résultat mesurable
-
-Éviter :
-
-> améliorer la lecture
-
-Préférer :
-
-> réduire les coupures audibles sous le seuil X sur le scénario Y
-
-La boucle doit savoir distinguer une amélioration réelle d'une impression.
-
-## Les 7 garanties minimales
-
-### 1. Mesurer le vrai résultat
-
-Mesurer l'effet réel, pas seulement un log qui affirme que tout va bien.
-
-### 2. Prouver la mesure avant de l'utiliser
-
-Avant d'optimiser, vérifier que l'instrument sait reconnaître :
-- un cas propre ;
-- un cas volontairement cassé.
-
-Si le test ne rougit jamais, la métrique ne protège rien.
-
-### 3. Une idée par tour
-
-Un tour = une hypothèse = une modification = une mesure.
-
-Sinon on ne sait plus ce qui a réellement amélioré ou cassé le résultat.
-
-### 4. Un arrêt dur
-
-Définir avant de commencer :
-- résultat atteint ;
-- nombre maximal de tours ;
-- budget atteint ;
-- grille épuisée ;
-- blocage réel ;
-- interruption humaine explicite.
-
-Une boucle sans arrêt n'est pas autonome. Elle est juste infinie.
-
-### 5. Pas de faux « terminé »
-
-Une mesure impossible, polluée ou non vérifiée n'est pas une réussite.
-
-Le statut doit pouvoir dire explicitement :
-- PASS ;
-- FAIL ;
-- NON MESURABLE ;
-- BLOQUÉ.
-
-### 6. Un état durable, pas une mémoire de conversation
-
-Le prochain réveil doit retrouver :
-- le dernier état ;
-- ce qui est déjà acquis ;
-- le reliquat ;
-- la prochaine action utile ;
-- les preuves.
-
-Sans relire tout le transcript précédent.
-
-### 7. Une seule boucle par chantier
-
-Plusieurs boucles concurrentes sur le même objet finissent par :
-- rejouer les mêmes tests ;
-- modifier les mêmes fichiers ;
-- se contredire ;
-- ne plus savoir laquelle possède la fin.
-
-## Structure minimale
-
-Un dossier de boucle peut rester très simple :
-
-```text
-boucle/
-├── program.md
-└── results.tsv
-```
-
-### program.md
-
-Il route vers le travail ; il ne recopie pas toute la méthode.
-
-Exemple :
-
-```markdown
-# Boucle — <sujet>
-
-Compétence propriétaire : /<skill>
-
-## Objectif mesurable
-<résultat visé>
-
-## Terminé quand
-<critères objectifs>
-
-## État actuel
-<ce qui est acquis / restant / bloqué>
-
-## Scope
-<ce qui peut être modifié>
-
-## Métrique
-<comment observer le vrai résultat>
-
-## Arrêt
-<résultat atteint / cap / blocage / interruption>
-```
-
-### results.tsv
-
-Une ligne par expérience :
-
-```text
-date    hypothese    changement    mesure    verdict    preuve    notes
-```
-
-Le journal porte l'historique. Le prompt de reprise n'a pas besoin de le raconter.
-
-## Prompt de reprise
-
-Le principe est volontairement court :
-
-```text
-/loop <cadence> /<competence> — reprends la boucle <slug> : lis l'état d'abord, une idée par tour, mesure le vrai résultat, journalise la preuve, STOP au cap.
-```
-
-Adapte la syntaxe de `/loop` au moteur disponible dans ton environnement.
-
-Ce qui compte n'est pas la commande exacte.
-
-Ce qui compte est que le réveil **recharge la compétence et l'état actuels** au lieu d'embarquer une
-copie figée de leur méthode.
-
-## Créer vs réparer
-
-### CRÉER
-
-Quand aucune boucle ne couvre encore le chantier :
-
-1. identifier la compétence propriétaire ;
-2. écrire l'objectif mesurable ;
-3. écrire les critères de fin ;
-4. préparer la métrique et son test positif/négatif ;
-5. créer l'état + journal ;
-6. définir la cadence ;
-7. armer la boucle.
-
-### RÉPARER / REPRENDRE
-
-Quand une boucle existe déjà :
-
-1. comprendre pourquoi elle s'est arrêtée ;
-2. vérifier ce qui a changé pendant son sommeil ;
-3. capitaliser les nouveaux apprentissages ;
-4. corriger son état / ses critères devenus faux ;
-5. conserver les preuves déjà acquises ;
-6. recalculer la cadence ;
-7. rallumer **la même boucle**.
-
-Ne jamais relancer aveuglément un vieux prompt après plusieurs semaines : il décrit probablement un
-monde qui n'existe plus.
-
-## Exemple
-
-Tu veux qu'un agent améliore automatiquement un pipeline de transformation.
-
-Mauvaise boucle :
-
-> « Relis toute l'architecture, applique ces 25 règles, ouvre tels fichiers, teste X, Y, Z… »
-
-Bonne boucle :
-
-- `/pipeline-transform` possède la méthode et les tests ;
-- `program.md` dit où en est le chantier ;
-- `results.tsv` conserve les expériences ;
-- le réveil appelle seulement la compétence et demande de reprendre la boucle.
-
-Quand `/pipeline-transform` est amélioré, le prochain réveil profite immédiatement de la nouvelle
-version.
-
-Aucun prompt de reprise à réécrire.
-
-## Ce que cette ressource ne contient volontairement pas
-
-Cette version publique décrit la méthode portable.
-
-Elle ne publie pas :
-- les hooks privés de l'auteur ;
-- ses chemins de fichiers ;
-- ses tableaux de bord internes ;
-- ses conventions de dépôt ;
-- ses métriques produit ;
-- ses incidents et historiques privés.
-
-Ces éléments sont utiles dans un environnement précis, pas dans une ressource réutilisable par tous.
-
-## Gate avant de dire qu'une boucle est prête
-
-- [ ] une compétence / procédure propriétaire existe ;
-- [ ] aucune autre boucle ne possède déjà le même chantier ;
-- [ ] l'objectif est mesurable ;
-- [ ] la métrique observe le résultat réel ;
-- [ ] la métrique a été testée sur un cas propre et un cas cassé ;
-- [ ] les critères de fin sont écrits avant le premier tour ;
-- [ ] le cap / arrêt dur est défini ;
-- [ ] l'état survit à la conversation ;
-- [ ] le journal permet de comprendre les expériences précédentes ;
-- [ ] le prompt de reprise route vers les sources actuelles au lieu de recopier la méthode.
+Une boucle n'est pas une deuxième méthode métier.
 
 ---
 
-Cette ressource est une version publique et volontairement portable d'une méthode utilisée sur des
-boucles de développement réelles. Elle est conçue pour être adaptée au moteur de boucle, au système
-de tests et à la structure de projet de chacun.
+# 1. Avant toute chose : créer ou reprendre ?
+
+Chercher si une boucle existe déjà pour :
+- le même objectif ;
+- la même compétence propriétaire ;
+- le même état canonique.
+
+Si oui :
+→ réparer / reprendre la même boucle.
+
+Si non :
+→ créer.
+
+Une boucle dormante reste une boucle existante.
+
+Ne jamais créer une jumelle simplement parce que l'ancienne est imparfaite.
+
+---
+
+# 2. Nommer la compétence propriétaire
+
+Question :
+
+> Quelle compétence / procédure sait réellement faire le travail que la boucle va répéter ?
+
+Sans owner clair, la boucle improvise sa méthode à chaque reprise.
+
+Si aucune compétence n'existe :
+- trouver une procédure existante à étendre ;
+- ou créer / améliorer une compétence avant de lancer la boucle.
+
+Si Anthropic skill-creator est disponible, l'utiliser pour cette étape :
+https://github.com/anthropics/skills/tree/main/skills/skill-creator
+
+Loop Creator ne doit pas écrire une mini-méthode parallèle dans son tracker.
+
+---
+
+# 3. Skill Readiness Gate
+
+Avant de faire tourner une méthode des dizaines de fois, vérifier qu'elle supporte réellement l'autonomie.
+
+La compétence doit répondre à ces questions :
+
+### Méthode
+Sait-elle quoi faire ?
+
+### Cold start
+Une nouvelle session peut-elle agir sans contexte caché ?
+
+### DONE
+Sait-elle reconnaître un résultat terminé ?
+
+### Preuve
+Existe-t-il une preuve observable plutôt qu'un simple « ça a l'air bon » ?
+
+### Failures
+Les principaux pièges sont-ils connus ou détectables ?
+
+### Dependencies
+Les outils, fichiers et permissions nécessaires sont-ils réellement disponibles ?
+
+### Scope
+Sait-elle ce qu'elle peut et ne peut pas toucher ?
+
+### Réutilisabilité
+La méthode est-elle durable, séparée de l'état particulier du chantier ?
+
+Si un critère critique échoue :
+
+> réparer la compétence d'abord.
+
+Puis refaire le gate une fois.
+
+Ne pas entrer dans une boucle infinie où Loop Creator réécrit continuellement la compétence qu'il essaie de boucler.
+
+---
+
+# 4. Faire un pré-mortem
+
+Avant d'armer la boucle, supposer :
+
+> « Elle a tourné plusieurs heures et elle a échoué. Pourquoi ? »
+
+Chercher les vrais scénarios d'échec :
+- mauvaise métrique ;
+- faux DONE ;
+- boucle qui tourne sans apprendre ;
+- skill incomplet ;
+- état perdu ;
+- outil indisponible ;
+- action hors scope ;
+- coût trop élevé ;
+- sous-agent qui ment sur son résultat ;
+- collision entre tâches parallèles ;
+- apprentissage jamais capitalisé ;
+- absence de condition d'arrêt.
+
+Pour une boucle simple, 3 causes sérieuses suffisent.
+
+Pour une boucle longue, coûteuse ou risquée, faire un vrai pré-mortem adversarial multi-angle.
+
+---
+
+# 5. Transformer les risques en architecture
+
+Après le pré-mortem, lire references/orchestration.md.
+
+Construire quatre cartes :
+- Failure Map — chaque risque a un owner, une prévention, une détection et un fallback ;
+- Responsibility Map — une responsabilité = un propriétaire ;
+- Authority Map — AUTO / GATED / FORBIDDEN ;
+- Delegation Map — mécanique → skill/agent spécialisé → sous-agent borné → main agent.
+
+La référence porte aussi les règles de parallélisme et les tiers LIGHT / STANDARD / DEEP.
+
+# 11. Les contrats de boucle
+
+Le format de stockage est libre.
+
+La boucle doit seulement satisfaire les contrats suivants.
+
+## Goal Contract
+
+- objectif observable ;
+- source / raison ;
+- scope ;
+- définition de fini.
+
+## State Contract
+
+Le prochain tour doit retrouver :
+- statut ;
+- acquis ;
+- restant ;
+- prochaine action ;
+- bloqueurs ;
+- cap.
+
+## Evidence Contract
+
+Chaque unité de travail conserve :
+- action / hypothèse ;
+- changement ;
+- résultat ;
+- preuve ;
+- verdict ;
+- apprentissage éventuel.
+
+## Measurement Contract
+
+- baseline ;
+- métrique du vrai résultat ;
+- cas positif ;
+- cas volontairement mauvais ;
+- seuil de succès.
+
+Une métrique qui ne sait jamais échouer n'est pas une métrique de confiance.
+
+## Stop Contract
+
+Définir avant le premier tour :
+- résultat atteint ;
+- nombre / coût / temps maximal ;
+- stagnation ;
+- espace de recherche épuisé ;
+- blocage non levable ;
+- interruption humaine.
+
+---
+
+# 12. Adapter AutoResearch
+
+Pour une boucle expérimentale de développement, tuning ou recherche :
+
+→ lire references/autoresearch.md
+
+Le mapping typique devient :
+
+~~~text
+program.md = état
+results.tsv = journal
+1 hypothèse = 1 unité de travail
+commit = transaction / preuve
+KEEP / DISCARD = verdict
+~~~
+
+Cette structure n'est PAS obligatoire pour toutes les boucles.
+
+---
+
+# 13. Learning Promotion
+
+Une observation ponctuelle reste dans le journal.
+
+Elle devient un apprentissage durable seulement si elle est :
+- suffisamment prouvée ;
+- généralisable ;
+- utile au-delà du tour courant.
+
+Puis router :
+
+~~~text
+nouvelle méthode
+→ Skill
+
+invariant
+→ Rule / règle durable
+
+contrôle déterministe
+→ Check / Hook / Script
+
+connaissance métier
+→ Documentation / Memory
+
+état courant
+→ Tracker
+~~~
+
+Si l'apprentissage doit améliorer la compétence propriétaire :
+
+> utiliser le workflow de création / amélioration de skill plutôt que modifier silencieusement le SKILL.md depuis la boucle.
+
+Le prochain tour recharge alors automatiquement la méthode actuelle.
+
+---
+
+# 14. Dry Run obligatoire
+
+Avant l'armement, exécuter un cycle réel ou simulé.
+
+Vérifier :
+
+- cold start ;
+- bon skill chargé ;
+- bon état retrouvé ;
+- bonne délégation ;
+- output des sous-agents ;
+- vraie métrique ;
+- mauvais cas détecté ;
+- preuve journalisée ;
+- apprentissage correctement routé ;
+- reprise après interruption ;
+- STOP.
+
+Pour une action sensible, le dry run peut s'arrêter juste avant le gate final.
+
+---
+
+# 15. Gate avant armement
+
+Une boucle est prête seulement si :
+
+- [ ] une compétence propriétaire existe ;
+- [ ] aucune autre boucle ne possède déjà le chantier ;
+- [ ] Skill Readiness passe ;
+- [ ] le pré-mortem a été traité ;
+- [ ] les risques importants ont un owner ;
+- [ ] l'autorité est claire ;
+- [ ] la délégation est claire ;
+- [ ] l'objectif est mesurable ;
+- [ ] la métrique observe le vrai résultat ;
+- [ ] un mauvais cas fait échouer la mesure ;
+- [ ] l'état survit à la conversation ;
+- [ ] le journal conserve les preuves ;
+- [ ] le chemin d'apprentissage est défini ;
+- [ ] le stop est défini ;
+- [ ] le dry run passe.
+
+---
+
+# 16. Prompt de reprise
+
+Le prompt doit rester court.
+
+Exemple générique :
+
+~~~text
+/loop <cadence> /<competence> — reprends <boucle> : état d'abord, une unité de travail, preuve, journal, STOP au cap.
+~~~
+
+La syntaxe exacte dépend du moteur disponible.
+
+Ce qui compte :
+
+> le réveil recharge la compétence et l'état actuels au lieu d'embarquer une copie figée de leur méthode.
+
+---
+
+# 17. Réparer une boucle existante
+
+Ne pas tout migrer d'un coup.
+
+À la prochaine optimisation :
+
+1. préserver son état ;
+2. préserver son journal ;
+3. préserver ses preuves ;
+4. garder la même identité ;
+5. ajouter uniquement les contrats/gates manquants ;
+6. supprimer un artefact legacy uniquement après avoir prouvé que son information vit ailleurs.
+
+C'est une migration « on touch ».
+
+---
+
+# 18. Quand NE PAS utiliser Loop Creator
+
+Ce n'est pas une vraie boucle autonome si la répétition n'a ni progression ni apprentissage.
+
+Exemples :
+
+- rappel tous les lundis → scheduler / routine ;
+- newsletter hebdomadaire identique → routine ;
+- gros chantier one-shot → plan / sprint ;
+- simple alerte conditionnelle → watcher si disponible.
+
+Une vraie boucle a au minimum :
+- un objectif qui progresse ;
+- un état ;
+- une unité de travail ;
+- une preuve ;
+- un stop.
+
+---
+
+# Sources d'inspiration
+
+## AutoResearch — Andrej Karpathy
+
+https://github.com/karpathy/autoresearch
+
+Ce projet fournit une mécanique extrêmement simple et puissante :
+expérience → budget fixe → mesure → garder / abandonner → journal → recommencer.
+
+Loop Creator reprend cette logique expérimentale quand le problème s'y prête.
+
+## ECC — Everything Claude Code
+
+https://github.com/affaan-m/ECC
+
+ECC pousse notamment des idées utiles autour de la séparation des responsabilités, de la vérification,
+des hooks/checks, de la mémoire, de l'apprentissage et de l'orchestration.
+
+Loop Creator combine ces inspirations avec une idée centrale :
+
+> la boucle ne remplace pas les skills ; elle les orchestre dans le temps.
+
+---
+
+# Résultat attendu
+
+Avant armement, produire mentalement ou explicitement :
+
+~~~text
+LOOP_ARCHITECTURE
+
+MODE:
+OBJECTIF:
+OWNER_SKILL:
+SKILL_READINESS:
+PREMORTEM:
+FAILURE_MAP:
+RESPONSIBILITY_MAP:
+AUTHORITY_MAP:
+DELEGATION_MAP:
+STATE:
+EVIDENCE:
+MEASUREMENT:
+STOP:
+LEARNING:
+DRY_RUN:
+READY_TO_ARM:
+~~~
+
+Si READY_TO_ARM = false :
+→ corriger le propriétaire du défaut.
+
+Ne jamais « armer quand même ».
