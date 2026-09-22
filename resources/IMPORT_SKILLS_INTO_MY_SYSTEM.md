@@ -21,7 +21,6 @@ Par défaut, la référence est **Everything Claude Code (ECC)**, mais la métho
 Le but n'est plus de mettre deux systèmes sur un pied d'égalité et de choisir quelques bonnes idées dans chacun.
 
 Le workflow est :
-
 ```text
 SYSTÈME ACTUEL
 → ARCHITECTURE DE RÉFÉRENCE
@@ -37,9 +36,7 @@ Principe :
 > La comparaison sert au diagnostic. La migration vers le meilleur système cible est le résultat.
 
 Cette ressource est une **V0.2 expérimentale**. Toujours commencer par un audit, figer la version de la référence, faire un backup et produire un dry-run avant toute mutation.
-
 ---
-
 ## Quand l'utiliser
 
 Utiliser ce skill quand :
@@ -56,9 +53,7 @@ Ne pas l'utiliser pour :
 - comparer deux repos uniquement pour produire un rapport sans intention de migration ;
 - copier aveuglément tous les skills d'ECC ;
 - supprimer des briques locales sans preuve de remplacement.
-
 ---
-
 ## Installation / utilisation rapide
 
 Ce fichier est autonome : il n'exige aucun script fourni avec cette ressource.
@@ -66,7 +61,6 @@ Ce fichier est autonome : il n'exige aucun script fourni avec cette ressource.
 ### Claude Code
 
 Copier ce fichier comme :
-
 ```text
 .claude/skills/import-skills-into-my-system/SKILL.md
 ```
@@ -87,7 +81,6 @@ Donner au skill :
 4. l'autorisation ou non d'écrire.
 
 Exemple de demande :
-
 ```text
 Analyse mon système actuel et migre-le vers les principes d'architecture ECC.
 
@@ -102,9 +95,7 @@ MIGRATION_PLAN
 
 Préserve explicitement mes personnalisations utiles.
 ```
-
 ---
-
 ## Prérequis et dépendances
 
 Requis :
@@ -121,9 +112,7 @@ Optionnel pour l'exécution :
 - outils de recherche dans le dépôt.
 
 Le skill ne dépend d'aucun outil privé de Florent.
-
 ---
-
 ## Ce que « migrer vers ECC » veut dire
 
 Cela ne veut **pas** dire :
@@ -151,9 +140,7 @@ Cela veut dire appliquer les **principes architecturaux vérifiés dans les sour
 - sécurité appliquée au harness lui-même.
 
 La référence donne la **forme cible**. Le système local fournit les capacités et personnalisations qu'il serait dangereux de perdre.
-
 ---
-
 ## Sources de référence ECC — primaires
 
 Ne pas utiliser une synthèse secondaire comme seule source.
@@ -179,9 +166,7 @@ ECC évolue vite. Au début de chaque run :
 `affaan-m/ECC@bf70150eb2df8070024e5bdf08e4aa08959e2735` — vérifié le 2026-09-22.
 
 Ce snapshot documente la version publique de ce skill. Il ne remplace jamais le `REFERENCE_LOCK` d'un run futur.
-
 ---
-
 ## Entrées
 
 ### 1. Système actuel
@@ -222,9 +207,7 @@ Extraire **les responsabilités et principes**, pas uniquement les noms de fichi
 - budget de contexte ;
 - coût de maintenance ;
 - migration progressive ou big bang interdit.
-
 ---
-
 # Workflow
 
 ## Étape 0 — Figer la référence
@@ -236,7 +219,6 @@ Avant de comparer :
 - noter les capacités ou parties de la référence non vérifiées.
 
 Sortie :
-
 ```text
 REFERENCE
 repo:
@@ -245,9 +227,7 @@ date:
 sources primaires:
 zones non vérifiées:
 ```
-
 ---
-
 ## Étape 1 — Extraire l'architecture cible depuis la référence
 
 Construire une carte des responsabilités.
@@ -275,9 +255,7 @@ Ne pas supposer qu'un dossier précis doit exister dans le système cible.
 La question est :
 
 > Quelle responsabilité doit exister, qui en est propriétaire et comment est-elle vérifiée ?
-
 ---
-
 ## Étape 2 — Auditer le système actuel
 
 Pour chaque responsabilité :
@@ -296,9 +274,7 @@ Pour chaque responsabilité :
 - état : solide / fragile / absent / ambigu.
 
 Ne pas commencer par les noms de fichiers.
-
 ---
-
 ## Étape 3 — Construire la GAP MAP
 
 Comparer le système actuel à la cible de référence.
@@ -321,9 +297,7 @@ Types d'écarts fréquents :
 - contrôle uniquement textuel alors qu'il peut être mécanique ;
 - architecture mono-harness alors que plusieurs adapters sont nécessaires ;
 - personnalisation utile cachée dans une brique à remplacer.
-
 ---
-
 ## Étape 4 — Décider capacité par capacité
 
 Une seule décision principale parmi :
@@ -361,9 +335,7 @@ Pour chaque capacité, justifier la décision avec au moins :
 - **preuve de fin** : comment vérifier après migration que la capacité fonctionne encore.
 
 Une décision sans preuve devient `UNRESOLVED`, pas une supposition élégante.
-
 ---
-
 ## Étape 5 — Dessiner l'architecture cible AVANT les mutations
 
 Produire :
@@ -389,9 +361,7 @@ Le résultat attendu n'est pas :
 mais :
 
 > « mon système reconstruit selon une architecture de référence, avec mes bonnes personnalisations conservées ».
-
 ---
-
 ## Étape 6 — Plan de migration
 
 Pour chaque changement :
@@ -413,9 +383,7 @@ Ordre recommandé :
 10. re-scan complet.
 
 Préférer une migration par lots réversibles à une réécriture opaque.
-
 ---
-
 ## Étape 7 — Exécution sûre
 
 Avant écriture :
@@ -434,9 +402,7 @@ Pendant :
 - conserver une possibilité de rollback ;
 - tester après chaque changement structurel ;
 - ne pas supprimer l'ancien owner avant que le nouveau soit prouvé.
-
 ---
-
 ## Étape 8 — Validation
 
 Après migration, prouver au minimum :
@@ -475,9 +441,7 @@ S'arrêter avant mutation et demander un arbitrage humain si :
 - une personnalisation locale importante ne peut pas être comprise ou testée ;
 - le backup / rollback n'est pas fiable ;
 - une suppression détruirait une capacité sans remplaçant prouvé.
-
 ---
-
 # Sortie obligatoire
 
 ## 1. REFERENCE_LOCK
@@ -533,9 +497,7 @@ VALIDATION_REPORT
 - tests:
 - rollback:
 ```
-
 ---
-
 # Gate final
 
 - [ ] référence figée et sourcée depuis les fichiers primaires ;
@@ -554,7 +516,6 @@ VALIDATION_REPORT
 ## Exemple minimal
 
 Système actuel :
-
 ```text
 CLAUDE.md contient 40 règles
 12 skills portent à la fois méthode + contrôle
@@ -563,7 +524,6 @@ une MEMORY.md sert aussi de tracker
 ```
 
 Référence ECC :
-
 ```text
 rules = contraintes durables
 skills = méthodes
@@ -572,7 +532,6 @@ memory ≠ tracker ≠ source canonique
 ```
 
 Exemple de décisions possibles :
-
 ```text
 coding-standards → KEEP_LOCAL
 pre-commit-checks → REDESIGN en hooks
@@ -582,9 +541,7 @@ review workflow → MIGRATE_CUSTOMIZATIONS vers une boucle de review séparée
 ```
 
 Le résultat n'est pas « installer ECC », mais **rendre les responsabilités du système cible plus explicites et vérifiables**.
-
 ---
-
 ## Statut de validation de cette ressource
 
 - structure / sources ECC : relues sur sources primaires le 2026-09-22 ;
@@ -594,9 +551,7 @@ Le résultat n'est pas « installer ECC », mais **rendre les responsabilités d
 - migration complète end-to-end avec cette V0.2.1 : **pas encore revendiquée comme éprouvée**.
 
 Ne pas retirer ce statut tant qu'un cas réel n'a pas produit un `VALIDATION_REPORT` complet.
-
 ---
-
 ## Limite actuelle
 
 Cette V0.2 formalise une migration **architecturale guidée par une référence**.
