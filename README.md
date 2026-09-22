@@ -18,6 +18,12 @@ This repo gives you that view : a single static HTML page that scans your filesy
 - **CLAUDE.md editor** — inline textarea for every `CLAUDE.md` file across your repos, with auto sections table-of-contents. Edits go into the same export.
 - **A Claude Code skill** (`skill/skill-hub/`) — install it in your `~/.claude/skills/` and invoke `/skill-hub` to orchestrate the full workflow.
 
+## Public skill catalog
+
+This repository also publishes standalone skills under [`skill/`](./skill/README.md).
+
+The full public catalog currently contains **22 standalone skills across 6 repositories**. Skills that belong to specialized toolkits remain canonical in those repositories and are indexed from [`skill/README.md`](./skill/README.md) instead of being duplicated here.
+
 ## Quickstart (5 steps, ~3 minutes)
 
 ```bash
@@ -86,8 +92,13 @@ claude-skill-hub/
 │   ├── generate_claude_md_index.py # scans + writes claude-md-data.json
 │   └── apply_changes.py           # consumes the exported JSON, applies actions
 ├── skill/
-│   └── skill-hub/
-│       └── SKILL.md               # Claude Code skill that orchestrates the workflow
+│   ├── README.md                  # public skill catalog across repos
+│   ├── skill-hub/SKILL.md
+│   ├── skill-cleaner/SKILL.md
+│   ├── import-skills-into-my-system/SKILL.md
+│   ├── loop-creator/SKILL.md
+│   └── skill-finder-research/SKILL.md
+├── resources/                     # legacy links, tombstones, supporting material
 └── README.md
 ```
 
