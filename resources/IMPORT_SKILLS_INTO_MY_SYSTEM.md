@@ -1,11 +1,13 @@
 ---
 name: import-skills-into-my-system
 description: >-
-  Audite un pack externe de skills avant de l'importer dans un système existant.
-  Compare d'abord les architectures puis les capacités, et décide pour chaque capacité
-  s'il faut garder le local, adopter l'externe, fusionner, migrer les personnalisations,
-  redessiner ou écarter. Utiliser avant toute importation massive de skills.
-version: 0.1.0
+  Migre un système agentique existant vers une architecture de référence sans perdre ses bonnes
+  personnalisations. ECC sert de profil de référence par défaut : le skill audite le système actuel,
+  extrait les principes architecturaux de la référence depuis ses sources primaires, construit une
+  architecture cible, décide capacité par capacité quoi conserver, remplacer, fusionner, migrer,
+  redessiner ou supprimer, puis produit un plan de migration vérifiable. Utiliser pour améliorer un
+  système existant à partir d'ECC ou d'un autre système de référence, pas pour empiler un pack de skills.
+version: 0.2.0
 status: experimental
 ---
 
@@ -13,228 +15,403 @@ status: experimental
 
 ## Mission
 
-Importer un pack externe sans partir du principe que :
+Prendre un système agentique existant et le **faire évoluer vers une meilleure architecture de référence**.
 
-- le système actuel doit survivre ;
-- le pack externe est meilleur parce qu'il est plus gros ;
-- deux skills proches doivent forcément coexister ;
-- « copier les fichiers » équivaut à intégrer un système.
+Par défaut, la référence est **Everything Claude Code (ECC)**, mais la méthode peut être appliquée à un autre système documenté.
+
+Le but n'est plus de mettre deux systèmes sur un pied d'égalité et de choisir quelques bonnes idées dans chacun.
+
+Le workflow est :
+
+```text
+SYSTÈME ACTUEL
+→ ARCHITECTURE DE RÉFÉRENCE
+→ DIAGNOSTIC DES ÉCARTS
+→ DÉCISIONS CAPACITÉ PAR CAPACITÉ
+→ ARCHITECTURE CIBLE
+→ MIGRATION
+→ VALIDATION
+```
 
 Principe :
 
-> Optimiser le système final, pas la survie du système actuel.
+> La comparaison sert au diagnostic. La migration vers le meilleur système cible est le résultat.
 
-Cette ressource est une **V0 expérimentale**. Commencer par un audit et un dry-run. Ne jamais écraser
-un système existant sans backup ni plan de migration explicite.
+Cette ressource est une **V0.2 expérimentale**. Toujours commencer par un audit, figer la version de la référence, faire un backup et produire un dry-run avant toute mutation.
+
+---
+
+## Ce que « migrer vers ECC » veut dire
+
+Cela ne veut **pas** dire :
+
+- recopier les dossiers ECC ;
+- installer ses 292 skills ;
+- remplacer automatiquement le local par l'externe ;
+- imposer Claude Code comme unique surface ;
+- supprimer une personnalisation locale qui fonctionne mieux.
+
+Cela veut dire appliquer les **principes architecturaux vérifiés dans les sources ECC** à son propre système :
+
+- responsabilités séparées ;
+- skills comme méthodes spécialisées chargées à la demande ;
+- agents / sub-agents comme unités d'exécution spécialisées ;
+- commands comme points d'entrée quand ils sont utiles ;
+- routing / orchestration explicites ;
+- rules limitées aux contraintes durables ;
+- hooks pour les contrôles mécaniques ;
+- mémoire séparée du suivi opérationnel et de la source canonique ;
+- apprentissage séparé de la mémoire ;
+- verification loops avant « done » ;
+- un propriétaire canonique par fait / responsabilité ;
+- adapters quand plusieurs harnesses doivent utiliser le même système ;
+- sécurité appliquée au harness lui-même.
+
+La référence donne la **forme cible**. Le système local fournit les capacités et personnalisations qu'il serait dangereux de perdre.
+
+---
+
+## Sources de référence ECC — primaires
+
+Ne pas utiliser une synthèse secondaire comme seule source.
+
+Pour chaque migration ECC, vérifier directement au minimum :
+
+- Repository : https://github.com/affaan-m/ECC
+- README : https://github.com/affaan-m/ECC/blob/main/README.md
+- Reference Architecture : https://github.com/affaan-m/ECC/blob/main/docs/ECC-2.0-REFERENCE-ARCHITECTURE.md
+- Hooks : https://github.com/affaan-m/ECC/blob/main/hooks/README.md
+- Living Docs Governance : https://github.com/affaan-m/ECC/blob/main/skills/living-docs-governance/SKILL.md
+- Unified Memory : https://github.com/affaan-m/ECC/blob/main/skills/unified-memory/SKILL.md
+- Continuous Learning v2 : https://github.com/affaan-m/ECC/blob/main/skills/continuous-learning-v2/SKILL.md
+- Commands Quick Reference : https://github.com/affaan-m/ECC/blob/main/COMMANDS-QUICK-REF.md
+
+ECC évolue vite. Au début de chaque run :
+
+1. relever le commit / tag / date de la référence réellement lue ;
+2. conserver ces pointeurs dans le rapport ;
+3. ne pas présenter comme principe stable un détail qui n'existe que dans une version ancienne.
 
 ---
 
 ## Entrées
 
-1. système actuel :
-   - repo / dossier ;
-   - skills ;
-   - agents ;
-   - hooks ;
-   - règles ;
-   - mémoire ;
-   - outils / MCP ;
-   - conventions de scope global / projet ;
+### 1. Système actuel
 
-2. pack externe :
-   - repo / dossier ;
-   - architecture ;
-   - capacités ;
-   - dépendances ;
-   - instructions d'installation ;
+Cartographier au minimum :
 
-3. contraintes :
-   - éléments à préserver ;
-   - chemins / runtime ;
-   - dépendances autorisées ;
-   - règles de sécurité ;
-   - budget de contexte / maintenance.
+- instructions / constitution ;
+- skills ;
+- agents / sub-agents ;
+- commands / points d'entrée ;
+- routing / orchestration ;
+- rules ;
+- hooks ;
+- memory ;
+- learning / capitalisation ;
+- tracker / état opérationnel ;
+- documentation canonique ;
+- verification loops / tests / QA ;
+- outils / MCP ;
+- sécurité ;
+- adapters / surfaces Claude Code, Codex, Cursor, etc. ;
+- scopes global / projet ;
+- personnalisations importantes.
 
----
+### 2. Architecture de référence
 
-## Étape 1 — Comparer les architectures AVANT les fichiers
+Par défaut : ECC.
 
-Construire deux cartes :
+Extraire **les responsabilités et principes**, pas uniquement les noms de fichiers.
 
-### Système actuel
-- comment les tâches sont routées ;
-- où vivent les règles ;
-- comment les skills sont découverts ;
-- quels agents / hooks / outils existent ;
-- quelles couches sont globales ou projet ;
-- comment le système teste, mesure et maintient ses compétences.
+### 3. Contraintes
 
-### Pack externe
-Même carte.
-
-Ne pas commencer par « quels fichiers ont le même nom ? ».
-
-Le vrai premier diagnostic est :
-
-> Les deux systèmes résolvent-ils les mêmes responsabilités avec la même architecture ?
-
----
-
-## Étape 2 — Construire la carte des capacités
-
-Pour chaque capacité réelle, lister :
-
-- capacité ;
-- owner local ;
-- owner externe ;
-- chevauchement ;
-- personnalisations locales ;
-- dépendances ;
-- qualité / maturité ;
-- tests disponibles ;
+- éléments explicitement intouchables ;
+- runtime / OS / harnesses ;
+- dépendances autorisées ;
+- règles de sécurité ;
+- compatibilité ;
+- budget de contexte ;
 - coût de maintenance ;
-- conflits éventuels.
-
-Un skill n'est pas une capacité.
-Plusieurs fichiers peuvent couvrir une seule capacité.
-Une capacité peut aussi être portée par une règle, un hook, un agent ou un outil.
+- migration progressive ou big bang interdit.
 
 ---
 
-## Étape 3 — Décider capacité par capacité
+# Workflow
 
-Une seule décision parmi :
+## Étape 0 — Figer la référence
+
+Avant de comparer :
+
+- identifier la version / commit de la référence ;
+- conserver les URLs primaires consultées ;
+- noter les capacités ou parties de la référence non vérifiées.
+
+Sortie :
+
+```text
+REFERENCE
+repo:
+commit/tag:
+date:
+sources primaires:
+zones non vérifiées:
+```
+
+---
+
+## Étape 1 — Extraire l'architecture cible depuis la référence
+
+Construire une carte des responsabilités.
+
+Pour ECC, partir au minimum de :
+
+| Responsabilité | Primitive / owner de référence |
+|---|---|
+| Méthode spécialisée | Skill |
+| Unité d'exécution | Agent / sub-agent |
+| Point d'entrée | Command / interface |
+| Choix de l'acteur / ordre | Routing / orchestration |
+| Contrainte durable | Rule |
+| Contrôle mécanique | Hook / test / gate |
+| Contexte durable | Memory |
+| Apprentissage | Learning / instincts |
+| État réel du travail | Tracker / runtime state |
+| Vérité gouvernée | Documentation / source canonique |
+| Preuve de fin | Verification loop |
+| Portage multi-harness | Adapter |
+| Sécurité du harness | Security / AgentShield |
+
+Ne pas supposer qu'un dossier précis doit exister dans le système cible.
+
+La question est :
+
+> Quelle responsabilité doit exister, qui en est propriétaire et comment est-elle vérifiée ?
+
+---
+
+## Étape 2 — Auditer le système actuel
+
+Pour chaque responsabilité :
+
+- owner actuel ;
+- emplacement ;
+- mécanisme de déclenchement ;
+- portée ;
+- dépendances ;
+- personnalisations locales ;
+- preuve / tests ;
+- doublons ;
+- conflits ;
+- coût de contexte ;
+- maintenance ;
+- état : solide / fragile / absent / ambigu.
+
+Ne pas commencer par les noms de fichiers.
+
+---
+
+## Étape 3 — Construire la GAP MAP
+
+Comparer le système actuel à la cible de référence.
+
+Pour chaque responsabilité / capacité :
+
+| Responsabilité | Référence | Local | Écart | Risque | Action candidate |
+|---|---|---|---|---|---|
+
+Types d'écarts fréquents :
+
+- capacité absente ;
+- mauvaise primitive ;
+- plusieurs owners ;
+- règle qui devrait être un hook ;
+- mémoire utilisée comme source de vérité ;
+- tracking mélangé à la documentation ;
+- skill utilisé comme agent ;
+- command créée pour chaque skill ;
+- contrôle uniquement textuel alors qu'il peut être mécanique ;
+- architecture mono-harness alors que plusieurs adapters sont nécessaires ;
+- personnalisation utile cachée dans une brique à remplacer.
+
+---
+
+## Étape 4 — Décider capacité par capacité
+
+Une seule décision principale parmi :
 
 ### KEEP_LOCAL
-Le système local couvre mieux la capacité.
+Le local satisfait déjà le principe cible et reste meilleur ou plus adapté.
 
-### ADOPT_EXTERNAL
-La brique externe est meilleure et peut remplacer la locale.
+### ADOPT_REFERENCE
+Adopter la brique ou le pattern de la référence.
 
-### MERGE_INTO_LOCAL
-Le local reste owner, mais absorbe des éléments externes utiles.
+### MERGE
+Conserver un owner principal et intégrer les éléments utiles de l'autre côté.
 
 ### MIGRATE_CUSTOMIZATIONS
-La brique externe devient owner ; les personnalisations locales utiles migrent dedans.
+La brique cible devient owner ; les personnalisations locales utiles migrent dedans.
 
 ### REDESIGN
-Ni le local ni l'externe ne doivent survivre tels quels. Concevoir une meilleure cible.
+Ni l'implémentation locale ni celle de référence ne conviennent telles quelles. Reconstruire selon le principe cible.
 
-### DISCARD_EXTERNAL
-La capacité externe n'apporte rien au système cible.
+### DISCARD
+Supprimer une brique devenue redondante, mauvaise ou inutile.
 
-Ne jamais choisir automatiquement KEEP_LOCAL juste parce que le local existe déjà.
+Règle :
+
+> L'architecture de référence gagne sur la structure uniquement quand le principe est réellement vérifié et pertinent. Une meilleure personnalisation locale doit survivre.
 
 ---
 
-## Étape 4 — Dessiner le système cible
+## Étape 5 — Dessiner l'architecture cible AVANT les mutations
 
-Avant toute copie, produire :
+Produire :
 
-1. architecture cible ;
-2. owners finaux ;
-3. skills / agents / hooks / règles à conserver ;
-4. éléments supprimés ;
-5. personnalisations à migrer ;
-6. dépendances à ajouter ;
-7. chemins cibles ;
-8. ordre de migration.
+1. responsabilités finales ;
+2. owner unique de chacune ;
+3. routes / orchestration ;
+4. rules réellement permanentes ;
+5. hooks / gates mécaniques ;
+6. mémoire ;
+7. learning ;
+8. tracking ;
+9. documentation canonique ;
+10. adapters ;
+11. sécurité ;
+12. éléments locaux préservés ;
+13. éléments à supprimer.
 
 Le résultat attendu n'est pas :
 
-> « voici 50 nouveaux skills installés »
+> « ECC installé par-dessus mon système »
 
 mais :
 
-> « voici le meilleur système final après comparaison ».
+> « mon système reconstruit selon une architecture de référence, avec mes bonnes personnalisations conservées ».
 
 ---
 
-## Étape 5 — Plan de migration
+## Étape 6 — Plan de migration
 
 Pour chaque changement :
 
-| Capacité | Décision | Source | Cible | Personnalisation à préserver | Test | Risque |
+| Responsabilité / capacité | Décision | Source actuelle | Cible | Personnalisation à préserver | Preuve | Risque |
 |---|---|---|---|---|---|---|
 
-Puis ordonner :
+Ordre recommandé :
 
 1. backup ;
-2. création / migration des nouveaux owners ;
-3. transfert des personnalisations ;
-4. tests ;
-5. mise à jour des routes / docs ;
-6. suppression des doublons ;
-7. re-scan du système ;
-8. preuve qu'aucune capacité utile n'a disparu.
+2. créer les nouveaux owners / nouvelles structures ;
+3. migrer les personnalisations ;
+4. mettre à jour routing et pointeurs ;
+5. ajouter hooks / gates / tests nécessaires ;
+6. vérifier les adapters ;
+7. basculer les consommateurs ;
+8. supprimer les anciens doublons ;
+9. mettre à jour la documentation canonique ;
+10. re-scan complet.
+
+Préférer une migration par lots réversibles à une réécriture opaque.
 
 ---
 
-## Étape 6 — Exécution sûre
+## Étape 7 — Exécution sûre
 
 Avant écriture :
 
 - backup obligatoire ;
 - dry-run ;
+- diff du plan ;
 - aucune suppression silencieuse ;
-- aucun overwrite sans comparaison ;
+- aucun overwrite sans lecture de la cible ;
 - aucun import massif « au cas où » ;
-- préserver les personnalisations explicitement utiles ;
-- documenter les décisions REDESIGN et DISCARD.
+- aucune copie de tout ECC si seules certaines responsabilités manquent.
 
-Après écriture :
+Pendant :
 
-- lancer les tests ;
-- vérifier les routes ;
-- vérifier les dépendances ;
-- rechercher les doublons ;
-- vérifier que chaque capacité a un owner clair ;
-- comparer le système final au plan cible.
+- un lot cohérent à la fois ;
+- conserver une possibilité de rollback ;
+- tester après chaque changement structurel ;
+- ne pas supprimer l'ancien owner avant que le nouveau soit prouvé.
 
 ---
 
-## Sortie
+## Étape 8 — Validation
 
-Toujours produire :
+Après migration, prouver au minimum :
 
-### 1. Diagnostic architecture
-Local vs externe.
+### Architecture
+- chaque responsabilité nécessaire a un owner ;
+- pas de double owner implicite ;
+- routing cohérent ;
+- pas de primitive manifestement mal utilisée.
 
-### 2. Matrice de décision
-Une ligne par capacité.
+### Non-perte
+- personnalisations locales utiles conservées ;
+- capacités utiles perdues = 0 ou liste explicitement acceptée ;
+- dépendances critiques présentes.
 
-### 3. Système cible
-Owners et structure finale.
+### Vérification
+- tests / gates concernés passent ;
+- hooks réellement chargés ;
+- routes réellement atteignables ;
+- docs pointent vers les sources canoniques ;
+- memory ≠ tracker ≠ vérité canonique ;
+- adapters cohérents avec les harnesses réellement utilisés.
 
-### 4. Plan de migration
-Ordonné et exécutable.
-
-### 5. Risques / bloqueurs
-Ce qui ne peut pas être tranché sans intervention humaine.
-
-### 6. Résultat de validation
-- capacités perdues : 0 ou liste explicite ;
-- doublons restants ;
-- routes cassées ;
-- dépendances manquantes ;
-- tests passés / échoués.
+### Nettoyage
+- doublons restants explicités ;
+- anciennes routes supprimées ;
+- fichiers / owners obsolètes retirés ;
+- aucun ancien système laissé actif « au cas où » sans raison.
 
 ---
 
-## Gate final
+# Sortie obligatoire
 
-- [ ] architectures comparées avant les fichiers ;
-- [ ] capacités cartographiées ;
-- [ ] aucune préférence automatique pour le local ou l'externe ;
-- [ ] une décision unique par capacité ;
-- [ ] personnalisations locales préservées ou explicitement abandonnées ;
-- [ ] système cible défini avant migration ;
-- [ ] backup / dry-run prévus ;
-- [ ] tests définis ;
-- [ ] doublons et routes vérifiés après migration.
+## 1. REFERENCE_LOCK
+Version et sources primaires.
+
+## 2. CURRENT_ARCHITECTURE
+Carte du système actuel.
+
+## 3. TARGET_ARCHITECTURE
+Architecture cible dérivée de la référence.
+
+## 4. GAP_MAP
+Écarts entre actuel et cible.
+
+## 5. DECISION_MATRIX
+KEEP_LOCAL / ADOPT_REFERENCE / MERGE / MIGRATE_CUSTOMIZATIONS / REDESIGN / DISCARD.
+
+## 6. MIGRATION_PLAN
+Ordre exact, risques, rollback, preuves.
+
+## 7. VALIDATION_REPORT
+Non-perte, doublons, routes, tests, documentation, adapters.
+
+---
+
+# Gate final
+
+- [ ] référence figée et sourcée depuis les fichiers primaires ;
+- [ ] responsabilités extraites avant comparaison des fichiers ;
+- [ ] système actuel cartographié ;
+- [ ] architecture cible définie avant mutation ;
+- [ ] une décision par responsabilité / capacité ;
+- [ ] personnalisations locales explicitement traitées ;
+- [ ] aucune copie aveugle de l'arborescence de référence ;
+- [ ] backup et dry-run ;
+- [ ] migration réversible par lots ;
+- [ ] preuves de fonctionnement après chaque lot ;
+- [ ] aucun double owner implicite restant ;
+- [ ] rapport final de non-perte.
 
 ## Limite actuelle
 
-Cette version est une **V0 méthodologique**. Elle formalise le raisonnement d'import et de migration,
-mais ne garantit pas qu'un pack tiers est sûr, compatible ou de qualité. L'audit du code et des
-dépendances du pack reste nécessaire.
+Cette V0.2 formalise une migration **architecturale guidée par une référence**.
+
+Elle ne prouve pas automatiquement que toute décision d'ECC convient à votre contexte. ECC reste une source de patterns et une architecture de référence, pas une vérité universelle.
+
+Les choix de runtime, sécurité, compatibilité et coût doivent être validés dans le système cible réel.
