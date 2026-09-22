@@ -1,13 +1,12 @@
 ---
 name: import-skills-into-my-system
 description: >-
-  Migre un système agentique existant vers une architecture de référence sans perdre ses bonnes
-  personnalisations. ECC sert de profil de référence par défaut : le skill audite le système actuel,
-  extrait les principes architecturaux de la référence depuis ses sources primaires, construit une
-  architecture cible, décide capacité par capacité quoi conserver, remplacer, fusionner, migrer,
-  redessiner ou supprimer, puis produit un plan de migration vérifiable. Utiliser pour améliorer un
-  système existant à partir d'ECC ou d'un autre système de référence, pas pour empiler un pack de skills.
-version: 0.2.0
+  Quand vous avez déjà un système de skills / agents / hooks / règles et que vous voulez l'améliorer
+  à partir d'une architecture externe comme ECC sans tout empiler → audite l'existant, fige les sources
+  primaires de la référence, construit une architecture cible, décide capacité par capacité quoi
+  conserver / remplacer / fusionner / migrer / redessiner / supprimer, puis produit un plan de migration
+  réversible et un rapport de validation. À utiliser avant toute migration architecturale ou import massif.
+version: 0.2.1
 status: experimental
 ---
 
@@ -38,6 +37,90 @@ Principe :
 > La comparaison sert au diagnostic. La migration vers le meilleur système cible est le résultat.
 
 Cette ressource est une **V0.2 expérimentale**. Toujours commencer par un audit, figer la version de la référence, faire un backup et produire un dry-run avant toute mutation.
+
+---
+
+## Quand l'utiliser
+
+Utiliser ce skill quand :
+
+- un système existant contient déjà des skills, agents, hooks, règles, mémoire ou conventions personnalisées ;
+- un système externe paraît mieux structuré et vous voulez **migrer vers ses principes**, pas seulement copier ses fichiers ;
+- vous hésitez entre garder une brique locale, adopter l'externe, fusionner les deux ou reconstruire ;
+- vous voulez intégrer ECC dans un environnement déjà personnalisé sans perdre ce qui fonctionne ;
+- vous avez importé plusieurs packs et l'architecture commence à devenir ambiguë.
+
+Ne pas l'utiliser pour :
+
+- installer un pack neuf dans un environnement vide sans personnalisation ;
+- comparer deux repos uniquement pour produire un rapport sans intention de migration ;
+- copier aveuglément tous les skills d'ECC ;
+- supprimer des briques locales sans preuve de remplacement.
+
+---
+
+## Installation / utilisation rapide
+
+Ce fichier est autonome : il n'exige aucun script fourni avec cette ressource.
+
+### Claude Code
+
+Copier ce fichier comme :
+
+```text
+.claude/skills/import-skills-into-my-system/SKILL.md
+```
+
+pour un usage projet, ou dans votre surface de skills utilisateur si vous voulez l'utiliser sur plusieurs dépôts.
+
+### Autres harnesses
+
+Placer le contenu dans la surface de skills / instructions réutilisables officiellement supportée par votre harness. Les chemins exacts diffèrent selon l'outil : ne pas inventer un chemin de compatibilité.
+
+### Invocation conseillée
+
+Donner au skill :
+
+1. le chemin / repo du système actuel ;
+2. la référence à utiliser — ECC par défaut ;
+3. les contraintes non négociables ;
+4. l'autorisation ou non d'écrire.
+
+Exemple de demande :
+
+```text
+Analyse mon système actuel et migre-le vers les principes d'architecture ECC.
+
+Commence en dry-run.
+N'écris rien avant d'avoir produit :
+REFERENCE_LOCK
+CURRENT_ARCHITECTURE
+TARGET_ARCHITECTURE
+GAP_MAP
+DECISION_MATRIX
+MIGRATION_PLAN
+
+Préserve explicitement mes personnalisations utiles.
+```
+
+---
+
+## Prérequis et dépendances
+
+Requis :
+
+- accès en lecture au système actuel ;
+- accès en lecture aux sources de référence ;
+- Git ou un mécanisme équivalent pour identifier la version de la référence ;
+- capacité à sauvegarder / revenir en arrière avant toute mutation.
+
+Optionnel pour l'exécution :
+
+- accès en écriture au dépôt cible ;
+- tests / linters / scripts de vérification propres au système cible ;
+- outils de recherche dans le dépôt.
+
+Le skill ne dépend d'aucun outil privé de Florent.
 
 ---
 
@@ -91,6 +174,11 @@ ECC évolue vite. Au début de chaque run :
 1. relever le commit / tag / date de la référence réellement lue ;
 2. conserver ces pointeurs dans le rapport ;
 3. ne pas présenter comme principe stable un détail qui n'existe que dans une version ancienne.
+
+**Snapshot utilisé pour relire cette V0.2.1 :**
+`affaan-m/ECC@bf70150eb2df8070024e5bdf08e4aa08959e2735` — vérifié le 2026-09-22.
+
+Ce snapshot documente la version publique de ce skill. Il ne remplace jamais le `REFERENCE_LOCK` d'un run futur.
 
 ---
 
@@ -262,6 +350,18 @@ Règle :
 
 > L'architecture de référence gagne sur la structure uniquement quand le principe est réellement vérifié et pertinent. Une meilleure personnalisation locale doit survivre.
 
+### Critère de décision minimal
+
+Pour chaque capacité, justifier la décision avec au moins :
+
+- **preuve locale** : fichier / comportement / test / règle réellement présent ;
+- **preuve référence** : source primaire correspondant au pattern retenu ;
+- **raison de migration** : quel problème concret la décision corrige ;
+- **non-perte** : quelles personnalisations doivent survivre ;
+- **preuve de fin** : comment vérifier après migration que la capacité fonctionne encore.
+
+Une décision sans preuve devient `UNRESOLVED`, pas une supposition élégante.
+
 ---
 
 ## Étape 5 — Dessiner l'architecture cible AVANT les mutations
@@ -366,6 +466,16 @@ Après migration, prouver au minimum :
 - fichiers / owners obsolètes retirés ;
 - aucun ancien système laissé actif « au cas où » sans raison.
 
+### Stop conditions
+
+S'arrêter avant mutation et demander un arbitrage humain si :
+
+- la référence contredit une contrainte métier / sécurité non négociable ;
+- deux owners candidats sont réellement équivalents et le choix change le comportement public ;
+- une personnalisation locale importante ne peut pas être comprise ou testée ;
+- le backup / rollback n'est pas fiable ;
+- une suppression détruirait une capacité sans remplaçant prouvé.
+
 ---
 
 # Sortie obligatoire
@@ -391,6 +501,39 @@ Ordre exact, risques, rollback, preuves.
 ## 7. VALIDATION_REPORT
 Non-perte, doublons, routes, tests, documentation, adapters.
 
+### Format compact attendu
+
+```text
+REFERENCE_LOCK
+- repo:
+- commit/tag:
+- sources:
+- non vérifié:
+
+CURRENT_ARCHITECTURE
+- ...
+
+TARGET_ARCHITECTURE
+- ...
+
+GAP_MAP
+| responsabilité | local | référence | écart | risque |
+
+DECISION_MATRIX
+| capacité | décision | preuve locale | preuve référence | personnalisation à préserver | preuve de fin |
+
+MIGRATION_PLAN
+1. ...
+2. ...
+
+VALIDATION_REPORT
+- capacités perdues:
+- doublons restants:
+- routes cassées:
+- tests:
+- rollback:
+```
+
 ---
 
 # Gate final
@@ -407,6 +550,52 @@ Non-perte, doublons, routes, tests, documentation, adapters.
 - [ ] preuves de fonctionnement après chaque lot ;
 - [ ] aucun double owner implicite restant ;
 - [ ] rapport final de non-perte.
+
+## Exemple minimal
+
+Système actuel :
+
+```text
+CLAUDE.md contient 40 règles
+12 skills portent à la fois méthode + contrôle
+aucun hook
+une MEMORY.md sert aussi de tracker
+```
+
+Référence ECC :
+
+```text
+rules = contraintes durables
+skills = méthodes
+hooks = contrôles mécaniques
+memory ≠ tracker ≠ source canonique
+```
+
+Exemple de décisions possibles :
+
+```text
+coding-standards → KEEP_LOCAL
+pre-commit-checks → REDESIGN en hooks
+memory/task-status → REDESIGN en deux owners
+custom-sales-skill → KEEP_LOCAL
+review workflow → MIGRATE_CUSTOMIZATIONS vers une boucle de review séparée
+```
+
+Le résultat n'est pas « installer ECC », mais **rendre les responsabilités du système cible plus explicites et vérifiables**.
+
+---
+
+## Statut de validation de cette ressource
+
+- structure / sources ECC : relues sur sources primaires le 2026-09-22 ;
+- portabilité : aucune dépendance privée volontaire ;
+- sécurité : backup + dry-run + rollback obligatoires ;
+- méthode : **expérimentale** ;
+- migration complète end-to-end avec cette V0.2.1 : **pas encore revendiquée comme éprouvée**.
+
+Ne pas retirer ce statut tant qu'un cas réel n'a pas produit un `VALIDATION_REPORT` complet.
+
+---
 
 ## Limite actuelle
 
