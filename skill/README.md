@@ -13,7 +13,7 @@ The public skill ecosystem is larger than this folder: specialized toolkits stay
 | [`import-skills-into-my-system`](./import-skills-into-my-system/SKILL.md) | Migrate an existing agent system toward a reference architecture while preserving useful customizations. |
 | [`loop-creator`](./loop-creator/SKILL.md) | Build resumable autonomous work loops without freezing the business method inside the resume prompt. |
 | [`skill-finder-research`](./skill-finder-research/SKILL.md) | Research and benchmark external skills/methods before adoption. |
-| [`router-reflexion-profonde`](./router-reflexion-profonde/SKILL.md) | Force a read-only deep-reasoning phase before executing complex or structural changes. |
+| [`router-reflexion-profonde`](./router-reflexion-profonde/SKILL.md) | Self-contained deep-reasoning router bundling problem framing, root-cause, system optimization and pre-mortem methods. |
 | [`router-consulting-strategy`](./router-consulting-strategy/SKILL.md) | Route business decisions through consulting-style framing, hypotheses, options and stress tests. |
 
 ## Other public skill repositories
