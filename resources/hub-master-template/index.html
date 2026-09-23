@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[Nom du hub] — Master Hub</title>
+<meta name="description" content="Hub central de tous les projets, agents et outils de [Votre nom].">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+/* ═══════════════════════════════════════════
+   PALETTE LIGHT — tokens canoniques
+   Ne pas modifier ces 15 variables — elles définissent
+   le design system partagé de tous les hubs.
+   ═══════════════════════════════════════════ */
+:root{
+  --bg:#fafafa;          /* fond principal */
+  --card:#ffffff;        /* cartes */
+  --card-soft:#f6f6fa;   /* hover/surfaces légères */
+  --border:#e5e5ee;      /* bordure légère */
+  --border-soft:#eeeef4; /* bordure très légère */
+  --text:#1a1a2e;        /* texte principal */
+  --text-soft:#4a4a5e;   /* texte secondaire */
+  --dim:#8888a0;         /* labels/muted */
+  --accent:#6c5ce7;      /* violet principal */
+  --teal:#00b3b0;
+  --green:#00b884;
+  --orange:#f59e0b;
+  --rose:#e05070;
+  --purple:#a78bfa;
+  --blue:#38bdf8;
+  --shadow:0 1px 3px rgba(0,0,0,.05), 0 4px 14px rgba(20,20,40,.04);
+  --shadow-hover:0 4px 12px rgba(0,0,0,.08), 0 12px 32px rgba(20,20,40,.08);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── BANNIÈRE SYSTÈME (optionnelle — lien vers page système/règles) ── */
+.system-banner{
+  display:block;
+  text-align:center;
+  padding:10px 16px;
+  background:rgba(108,92,231,.08);
+  border-bottom:1px solid var(--border);
+  font-size:12.5px;
+  color:var(--accent);
+  font-weight:700;
+  text-decoration:none;
+}
+.system-banner:hover{background:rgba(108,92,231,.14)}
+
+/* ── HERO ── */
+.hero{
+  text-align:center;
+  padding:80px 24px 60px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse 70% 50% at 50% -10%, rgba(108,92,231,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;opacity:.8}
+.hero h1{font-size:clamp(28px,6vw,48px);font-weight:900;line-height:1.1;margin-bottom:14px;color:var(--text)}
+.hero-sub{font-size:14px;color:var(--text-soft);max-width:480px;margin:0 auto 40px;line-height:1.6}
+.hero-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+
+/* ── NAV STRIP ── */
+.nav-strip{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;padding:16px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(250,250,250,.92);backdrop-filter:blur(12px);z-index:100}
+.nav-strip a{font-size:11px;color:var(--text-soft);text-decoration:none;padding:5px 14px;border:1px solid var(--border);border-radius:20px;transition:all .15s;white-space:nowrap}
+.nav-strip a:hover{border-color:var(--accent);color:var(--text)}
+
+/* ── MAIN ── */
+main{max-width:980px;margin:0 auto;padding:48px 24px 100px}
+.section{margin-bottom:52px}
+.section-label{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2em;color:var(--dim);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+
+/* ── HUB CARD (structure canonique — ne pas modifier) ── */
+.hub-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:22px 22px 18px;
+  text-decoration:none;
+  color:var(--text);
+  display:block;
+  position:relative;
+  overflow:hidden;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.hub-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity .25s;
+  background:radial-gradient(ellipse 80% 60% at 50% -20%, var(--glow,rgba(108,92,231,.15)) 0%, transparent 70%);
+}
+.hub-card:hover{border-color:var(--hover-border,var(--accent));transform:translateY(-3px);box-shadow:var(--shadow-hover)}
+.hub-card:hover::before{opacity:1}
+.hub-card-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.hub-icon{font-size:28px;line-height:1;flex-shrink:0}
+.hub-project{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:2px}
+.hub-name{font-size:16px;font-weight:800;line-height:1.2}
+.hub-desc{font-size:11px;color:var(--text-soft);line-height:1.6;margin-bottom:14px}
+.hub-tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.05em}
+.hub-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.hub-status{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.hub-status::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;display:block}
+.hub-arrow{font-size:14px;color:#aaaabc;transition:transform .2s}
+.hub-card:hover .hub-arrow{transform:translateX(4px);color:var(--text)}
+
+/* ── CARTE BIENTÔT DISPONIBLE ── */
+.hub-card.soon{opacity:.5;pointer-events:none;filter:grayscale(.5)}
+.hub-card.soon .hub-status::before{background:#ccccdd}
+
+/* ── QUICK LINKS (liens rapides secondaires) ── */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.quick-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--text);display:flex;align-items:center;gap:10px;transition:all .15s}
+.quick-card:hover{border-color:var(--accent);background:var(--card-soft)}
+.quick-card-icon{font-size:20px;flex-shrink:0}
+.quick-card-title{font-size:12px;font-weight:700;margin-bottom:1px}
+.quick-card-sub{font-size:10px;color:var(--dim)}
+
+/* ── TOKEN HUB ── */
+.tk-header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.tk-header-icon{font-size:28px}
+.tk-header-title{font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:var(--text-soft)}
+.tk-container{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:8px 24px;overflow:hidden}
+.tk-row{display:flex;align-items:center;padding:20px 4px;border-bottom:1px solid var(--border);transition:opacity .2s}
+.tk-row:last-child{border-bottom:none}
+.tk-row.depleted{opacity:.35}
+.tk-name-col{width:280px;display:flex;align-items:center;gap:14px}
+.tk-icon{font-size:32px;line-height:1}
+.tk-name{font-size:17px;font-weight:800;letter-spacing:.02em;margin-bottom:2px}
+.tk-email{font-size:13px;color:var(--text-soft)}
+.tk-plan{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.tk-plan-max{background:rgba(212,160,23,.2);color:#d4a017}
+.tk-plan-pro{background:rgba(66,133,244,.15);color:#69a3f7}
+.tk-plan-free{background:rgba(100,100,150,.12);color:#6666aa}
+.tk-bar-col{flex:1;margin:0 24px}
+.tk-bar{height:6px;background:#e5e5ee;border-radius:10px;overflow:hidden}
+.tk-bar-fill{height:100%;border-radius:10px;transition:width .5s ease}
+.tk-bar-green{background:linear-gradient(90deg,#00b894,#00896e)}
+.tk-bar-orange{background:linear-gradient(90deg,#f59e0b,#d97706)}
+.tk-bar-red{background:linear-gradient(90deg,#e05070,#b83050)}
+.tk-bar-empty{background:#dedee8}
+.tk-dispo-col{width:90px;text-align:right}
+.tk-dispo-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.tk-dispo-val{font-size:18px;font-weight:800;font-family:'Consolas','Monaco',monospace}
+.tk-dispo-high{color:#e05070}.tk-dispo-mid{color:#f59e0b}.tk-dispo-ok{color:#00b894}.tk-dispo-zero{color:#33334a}
+.tk-reset-col{width:110px;text-align:right;margin-right:12px}
+.tk-reset-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.tk-reset-val{font-size:16px;font-weight:600;color:var(--text-soft)}
+.tk-gear{background:transparent;border:1px solid var(--border);color:var(--dim);border-radius:8px;padding:8px;cursor:pointer;font-size:14px;transition:all .15s;outline:none}
+.tk-gear:hover{border-color:var(--accent);color:var(--accent)}
+.tk-live{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#00b894;margin-left:auto}
+.tk-live-dot{width:7px;height:7px;border-radius:50%;background:#00b894;animation:tkPulse 2s infinite}
+@keyframes tkPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,184,148,.5)}50%{opacity:.6;box-shadow:0 0 8px 3px rgba(0,184,148,.3)}}
+
+/* ── MODAL PARAMÉTRAGE TOKEN ── */
+.tk-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(200,200,220,.6);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:all .2s}
+.tk-modal-overlay.active{opacity:1;pointer-events:auto}
+.tk-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.12);transform:translateY(20px);transition:all .2s}
+.tk-modal-overlay.active .tk-modal{transform:translateY(0)}
+.tk-modal-title{font-size:20px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.tk-modal-sub{color:var(--text-soft);font-size:13px;margin-bottom:24px}
+.tk-input-group{margin-bottom:20px}
+.tk-label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-soft);margin-bottom:8px}
+.tk-input{width:100%;background:#f5f5fb;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:12px 16px;font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:border .2s;box-sizing:border-box}
+.tk-input:focus{border-color:var(--accent)}
+.tk-slider-wrap{display:flex;align-items:center;gap:16px}
+.tk-slider{flex-grow:1;accent-color:var(--accent)}
+.tk-slider-val{font-size:18px;font-weight:800;font-family:monospace;min-width:45px;text-align:right}
+.tk-actions{display:flex;gap:12px;margin-top:28px}
+.tk-btn{flex:1;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+.tk-btn-cancel{background:transparent;color:var(--text-soft);border:1px solid var(--border)}
+.tk-btn-cancel:hover{background:var(--card-soft);color:var(--text)}
+.tk-btn-save{background:var(--accent);color:#fff}
+.tk-btn-save:hover{background:#5a4ad1;box-shadow:0 0 18px rgba(108,92,231,.4)}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:32px 24px;border-top:1px solid var(--border);color:#aaaabc;font-size:10px}
+footer a{color:var(--dim);text-decoration:none}
+footer a:hover{color:var(--accent)}
+
+@keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     BANNIÈRE SYSTÈME (optionnelle)
+     → Pointer vers votre page système/règles si elle existe.
+     Supprimer ce bloc si vous n'avez pas de page système.
+     ══════════════════════════════════════════════════════ -->
+<a href="#" class="system-banner">
+  🧩 Le système — règles · skills · partage →
+  <!-- Remplacer href="#" par l'URL de votre page système -->
+</a>
+
+<!-- ══ NAV STRIP (sticky) ══════════════════════════════ -->
+<nav class="nav-strip">
+  <a href="#hubs">🏠 Tous les hubs</a>
+  <a href="#tools">🧰 Outils</a>
+  <a href="#token-hub">⚡ Tokens</a>
+  <!-- Ajouter des ancres selon vos sections -->
+</nav>
+
+<!-- ══ HERO ════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-eyebrow">[Votre nom] · [Projet 1] · [Projet 2]</div>
+  <h1>Master Hub</h1>
+  <div class="hero-sub">Point d'entrée central pour tous vos projets, agents IA, workflows et outils.</div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">2</div>
+      <div class="stat-label">Projets actifs</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">–</div>
+      <div class="stat-label">Skills IA</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">–</div>
+      <div class="stat-label">Agents</div>
+    </div>
+    <!-- Ajouter / retirer des stats selon vos besoins -->
+  </div>
+</div>
+
+<!-- ══ MODAL PARAMÉTRAGE TOKEN ════════════════════════ -->
+<div class="tk-modal-overlay" id="tk-modal-overlay">
+  <div class="tk-modal">
+    <div class="tk-modal-title"><span id="tk-modal-icon"></span> <span id="tk-modal-name">Compte</span></div>
+    <div class="tk-modal-sub" id="tk-modal-email">email</div>
+    <div class="tk-input-group">
+      <label class="tk-label">Consommation actuelle (%)</label>
+      <div class="tk-slider-wrap">
+        <input type="range" id="tk-modal-usage" class="tk-slider" min="0" max="100" step="1"
+               oninput="document.getElementById('tk-modal-usage-val').textContent=this.value+'%'">
+        <div class="tk-slider-val" id="tk-modal-usage-val">0%</div>
+      </div>
+    </div>
+    <div class="tk-input-group">
+      <label class="tk-label">Prochain Reset (Date & Heure)</label>
+      <input type="datetime-local" id="tk-modal-reset" class="tk-input">
+      <div style="font-size:11px;color:#8888a0;margin-top:8px;line-height:1.5">
+        À cette date, la consommation repasse à 0 % et le prochain reset est calculé automatiquement.
+      </div>
+    </div>
+    <div class="tk-actions">
+      <button class="tk-btn tk-btn-cancel" onclick="closeTkModal()">Annuler</button>
+      <button class="tk-btn tk-btn-save"   onclick="saveTkModal()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONTENU PRINCIPAL ═══════════════════════════════ -->
+<main>
+
+  <!-- ──────────────────────────────────────────────────
+       SECTION 1 — TOUS LES HUBS
+       Règle : 2 projets max à la racine (umbrella chacun).
+       Si vous avez 3+ projets, créer des sub-hubs et
+       pointer vers eux depuis ces 2 cartes umbrella.
+       ────────────────────────────────────────────────── -->
+  <div class="section" id="hubs">
+    <div class="section-label">🏠 Tous les hubs</div>
+    <div class="hub-grid">
+
+      <!-- PROJET 1 (umbrella) ──────────────────────── -->
+      <!-- Remplacer href par l'URL Vercel de votre sub-hub -->
+      <a href="#"
+         class="hub-card"
+         style="--glow:rgba(59,130,246,.15);--hover-border:#3b82f6">
+        <div class="hub-card-top">
+          <div class="hub-icon">🚀</div>
+          <div class="hub-meta">
+            <div class="hub-project">Projet umbrella</div>
+            <div class="hub-name">[Sous-hub 1]</div>
+          </div>
+        </div>
+        <div class="hub-desc">
+          <strong>[Pitch en 1 phrase : ce que couvre ce sous-hub].</strong>
+          [Description courte : 2-3 fonctionnalités clés, contexte métier, lien avec les projets regroupés.]
+        </div>
+        <div class="hub-tags">
+          <span class="tag" style="background:rgba(59,130,246,.1);color:#3b82f6">[Tag 1]</span>
+          <span class="tag" style="background:rgba(245,158,11,.1);color:#f59e0b">[Tag 2]</span>
+          <span class="tag" style="background:rgba(0,206,201,.1);color:#00cec9">[Tag 3]</span>
+        </div>
+        <div class="hub-footer">
+          <div class="hub-status" style="color:#3b82f6">Live</div>
+          <div class="hub-arrow">→</div>
+        </div>
+      </a>
+
+      <!-- PROJET 2 (umbrella) ──────────────────────── -->
+      <a href="#"
+         class="hub-card"
+         style="--glow:rgba(108,92,231,.15);--hover-border:#6c5ce7">
+        <div class="hub-card-top">
+          <div class="hub-icon">🎙️</div>
+          <div class="hub-meta">
+            <div class="hub-project">Projet umbrella</div>
+            <div class="hub-name">[Sous-hub 2]</div>
+          </div>
+        </div>
+        <div class="hub-desc">
+          <strong>[Pitch en 1 phrase : ce que couvre ce sous-hub].</strong>
+          [Description courte : 2-3 fonctionnalités clés, contexte métier.]
+        </div>
+        <div class="hub-tags">
+          <span class="tag" style="background:rgba(108,92,231,.1);color:#6c5ce7">[Tag 1]</span>
+          <span class="tag" style="background:rgba(56,189,248,.1);color:#38bdf8">[Tag 2]</span>
+          <span class="tag" style="background:rgba(0,184,148,.1);color:#00b894">[Tag 3]</span>
+        </div>
+        <div class="hub-footer">
+          <div class="hub-status" style="color:#6c5ce7">Live</div>
+          <div class="hub-arrow">→</div>
+        </div>
+      </a>
+
+      <!-- EXEMPLE : carte "Bientôt disponible" ────────
+           Ajouter la classe .soon pour désactiver la carte.
+      <a href="#" class="hub-card soon"
+         style="--glow:rgba(0,184,148,.1);--hover-border:#00b884">
+        <div class="hub-card-top">
+          <div class="hub-icon">🔮</div>
+          <div class="hub-meta">
+            <div class="hub-project">Projet umbrella</div>
+            <div class="hub-name">[Sous-hub 3]</div>
+          </div>
+        </div>
+        <div class="hub-desc">[Sous-hub à venir]</div>
+        <div class="hub-footer">
+          <div class="hub-status" style="color:#8888a0">Bientôt</div>
+          <div class="hub-arrow">→</div>
+        </div>
+      </a>
+      ─────────────────────────────────────────────────── -->
+
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────
+       SECTION 2 — OUTILS / SKILLS PERSO
+       1 carte umbrella max pour regrouper vos outils
+       transversaux (marketplace de skills, etc.)
+       ────────────────────────────────────────────────── -->
+  <div class="section" id="tools">
+    <div class="section-label">🧰 Outils &amp; Skills perso</div>
+    <div class="hub-grid">
+
+      <a href="#"
+         class="hub-card"
+         style="--glow:rgba(79,70,229,.18);--hover-border:#4f46e5">
+        <div class="hub-card-top">
+          <div class="hub-icon">🧰</div>
+          <div class="hub-meta">
+            <div class="hub-project">Hub unifié</div>
+            <div class="hub-name">[Hub Skills &amp; Outils]</div>
+          </div>
+        </div>
+        <div class="hub-desc">
+          [Description : votre marketplace de skills Claude Code, pipeline de dev, formation.]
+        </div>
+        <div class="hub-tags">
+          <span class="tag" style="background:rgba(79,70,229,.12);color:#6366f1">[N skills]</span>
+          <span class="tag" style="background:rgba(0,184,148,.1);color:#00b894">[Autre tag]</span>
+        </div>
+        <div class="hub-footer">
+          <div class="hub-status" style="color:#6366f1">Live</div>
+          <div class="hub-arrow">→</div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────
+       SECTION 3 — TOKEN HUB (tracker crédits IA)
+       Fonctionne 100 % en localStorage, sans backend.
+       Configurer CLAUDE_ACCOUNTS et AG_ACCOUNTS dans le JS.
+       Modèle : 2 comptes Claude (dual-bar All+Sonnet)
+                4 comptes Google/AG (dual-bar Gemini+Sonnet)
+       ────────────────────────────────────────────────── -->
+  <div class="section" id="token-hub" style="padding:0">
+    <div class="tk-header">
+      <span class="tk-header-icon">⚡</span>
+      <span class="tk-header-title">Token Hub — Crédits IA</span>
+      <span class="tk-live"><span class="tk-live-dot"></span>LIVE</span>
+    </div>
+    <div class="tk-container" id="tk-grid">
+      <!-- Rendu par JS -->
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ FOOTER ══════════════════════════════════════════ -->
+<footer>
+  <div style="margin-bottom:8px">
+    [Votre nom] ·
+    <a href="#" target="_blank">[Lien 1]</a> ·
+    <a href="#" target="_blank">[Lien 2]</a>
+  </div>
+  <div>Master Hub · [Nom de marque] · 2026</div>
+</footer>
+
+<!-- ══ TOKEN HUB ENGINE ════════════════════════════════
+     Modèle : 2 comptes Claude (dual-bar All modèles + Sonnet)
+              4 comptes Google/AG (dual-bar Gemini + Sonnet)
+     Tout en localStorage — sans backend.
+     ══════════════════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIGURATION — remplacer les placeholders [...] uniquement
+// ═══════════════════════════════════════════════════════
+
+// SECTION 1 : Comptes Claude Anthropic (dual-bar : Tous modèles + Sonnet)
+const CLAUDE_ACCOUNTS = [
+  { name:'[Claude Compte 1]', email:'[email compte 1]', plan:'Pro',
+    allId:'c1-all', sonnetId:'c1-sonnet', resetDays:7 },
+  { name:'[Claude Compte 2]', email:'[email compte 2]', plan:'Pro',
+    allId:'c2-all', sonnetId:'c2-sonnet', resetDays:7 }
+];
+
+// SECTION 2 : Comptes Google / AG (dual-bar : Gemini + Sonnet)
+const AG_ACCOUNTS = [
+  { num:1, label:'[Google Compte 1]', email:'[email Google 1]', plan:'Pro',
+    geminiId:'ag1-gemini', geminiModel:'[Modèle principal]',
+    sonnetId:'ag1-sonnet', sonnetModel:'[Modèle secondaire]', resetDays:6 },
+  { num:2, label:'[Google Compte 2]', email:'[email Google 2]', plan:'Free',
+    geminiId:'ag2-gemini', geminiModel:'[Modèle principal]',
+    sonnetId:'ag2-sonnet', sonnetModel:'[Modèle secondaire]', resetDays:6 },
+  { num:3, label:'[Google Compte 3]', email:'[email Google 3]', plan:'Free',
+    geminiId:'ag3-gemini', geminiModel:'[Modèle principal]',
+    sonnetId:'ag3-sonnet', sonnetModel:'[Modèle secondaire]', resetDays:6 },
+  { num:4, label:'[Google Compte 4]', email:'[email Google 4]', plan:'Free',
+    geminiId:'ag4-gemini', geminiModel:'[Modèle principal]',
+    sonnetId:'ag4-sonnet', sonnetModel:'[Modèle secondaire]', resetDays:6 }
+];
+
+// ═══════════════════════════════════════════════════════
+// MOTEUR — ne pas modifier
+// ═══════════════════════════════════════════════════════
+
+// Flatten pour lookup modal
+const ALL_ENTRIES = [];
+CLAUDE_ACCOUNTS.forEach(c => {
+  ALL_ENTRIES.push({ id:c.allId,    name:c.name+' — Tous modèles', email:c.email, resetDays:c.resetDays });
+  ALL_ENTRIES.push({ id:c.sonnetId, name:c.name+' — Sonnet',       email:c.email, resetDays:c.resetDays });
+});
+AG_ACCOUNTS.forEach(g => {
+  ALL_ENTRIES.push({ id:g.geminiId, name:g.label+' — Gemini', email:g.email, resetDays:g.resetDays });
+  ALL_ENTRIES.push({ id:g.sonnetId, name:g.label+' — Sonnet', email:g.email, resetDays:g.resetDays });
+});
+
+let activeModalId = null;
+
+function getTkState(id, defDays) {
+  let s = { usage: 0, resetTs: null };
+  try {
+    const raw = JSON.parse(localStorage.getItem('tokenHub_v4_template') || '{}');
+    if (raw[id]) {
+      if (raw[id].usage !== undefined) s.usage = raw[id].usage;
+      if (raw[id].resetTs) s.resetTs = raw[id].resetTs;
+    }
+  } catch(e) {}
+  if (!s.resetTs) { s.resetTs = Date.now() + defDays*24*3600*1000; saveTkState(id,s); }
+  if (s.resetTs <= Date.now()) {
+    s.usage = 0;
+    while (s.resetTs <= Date.now()) s.resetTs += defDays*24*3600*1000;
+    saveTkState(id,s);
+  }
+  return s;
+}
+function saveTkState(id, data) {
+  let s = {};
+  try { s = JSON.parse(localStorage.getItem('tokenHub_v4_template') || '{}'); } catch(e) {}
+  s[id] = { ...s[id], ...data };
+  localStorage.setItem('tokenHub_v4_template', JSON.stringify(s));
+}
+
+function barCls(p)  { return p>=85?'tk-bar-red':p>=50?'tk-bar-orange':p>0?'tk-bar-green':'tk-bar-empty'; }
+function dispCls(p) { return p>=85?'tk-dispo-high':p>=50?'tk-dispo-mid':p>0?'tk-dispo-ok':'tk-dispo-zero'; }
+function planCls(p) { return p==='Max'?'tk-plan-max':p==='Pro'?'tk-plan-pro':'tk-plan-free'; }
+function fmtTime(ts) {
+  const d = ts - Date.now();
+  if (d<=0) return 'Maintenant';
+  const h = Math.floor(d/3600000), m = Math.floor((d%3600000)/60000);
+  return h<24 ? h+'h '+m+'m' : Math.floor(h/24)+'j '+(h%24)+'h';
+}
+function fmtInput(ts) {
+  const d = new Date(ts); d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+  return d.toISOString().slice(0,16);
+}
+
+// Carte Claude — dual-bar : Tous modèles + Sonnet
+function claudeCard(c) {
+  const as = getTkState(c.allId, c.resetDays);
+  const ss = getTkState(c.sonnetId, c.resetDays);
+  const aPct = as.usage, sPct = ss.usage;
+  const aAvail = Math.max(0,100-aPct), sAvail = Math.max(0,100-sPct);
+  const aDep = aPct>=100, sDep = sPct>=100;
+  const bothDep = aDep && sDep;
+  const resetText = fmtTime(Math.min(as.resetTs, ss.resetTs));
+  return `
+  <div class="tk-row" style="flex-wrap:wrap;gap:6px;padding:16px 20px;${bothDep?'opacity:.35':''}">
+    <div style="width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">🟠</span>
+        <div>
+          <div style="font-size:15px;font-weight:800">${c.name}</div>
+          <div style="font-size:11px;color:#4a4a5e;margin-top:1px">${c.email} · <span class="tk-plan ${planCls(c.plan)}">${c.plan}</span></div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:#8888a0;text-transform:uppercase;letter-spacing:.08em">Reset</div>
+        <div style="font-size:15px;font-weight:700;color:#4a4a5e">${resetText}</div>
+      </div>
+    </div>
+    <div style="width:100%;display:flex;gap:16px">
+      <div style="flex:1;background:#f0f0f6;border-radius:10px;padding:10px 14px;border:1px solid #e5e5ee">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:12px;font-weight:800;color:#f59e0b">🟠 Tous modèles</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="tk-dispo-val ${dispCls(aPct)}" style="font-size:13px">${aDep?'Épuisé':aAvail+'%'}</span>
+            <button class="tk-gear" onclick="openTkModal('${c.allId}')" style="padding:3px 5px;font-size:11px">⚙️</button>
+          </div>
+        </div>
+        <div class="tk-bar"><div class="tk-bar-fill ${barCls(aPct)}" style="width:${Math.min(100,aPct)}%"></div></div>
+      </div>
+      <div style="flex:1;background:#f0f0f6;border-radius:10px;padding:10px 14px;border:1px solid #e5e5ee">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:12px;font-weight:800;color:#a78bfa">🟣 Sonnet</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="tk-dispo-val ${dispCls(sPct)}" style="font-size:13px">${sDep?'Épuisé':sAvail+'%'}</span>
+            <button class="tk-gear" onclick="openTkModal('${c.sonnetId}')" style="padding:3px 5px;font-size:11px">⚙️</button>
+          </div>
+        </div>
+        <div class="tk-bar"><div class="tk-bar-fill ${barCls(sPct)}" style="width:${Math.min(100,sPct)}%"></div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Carte Google/AG — dual-bar : Gemini + Sonnet
+function googleCard(g) {
+  const gs = getTkState(g.geminiId, g.resetDays);
+  const ss = getTkState(g.sonnetId, g.resetDays);
+  const gPct = gs.usage, sPct = ss.usage;
+  const gAvail = Math.max(0,100-gPct), sAvail = Math.max(0,100-sPct);
+  const gDep = gPct>=100, sDep = sPct>=100;
+  const bothDep = gDep && sDep;
+  const resetText = fmtTime(Math.min(gs.resetTs, ss.resetTs));
+  return `
+  <div class="tk-row" style="flex-wrap:wrap;gap:6px;padding:16px 20px;${bothDep?'opacity:.35':''}">
+    <div style="width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">🌐</span>
+        <div>
+          <div style="font-size:15px;font-weight:800">${g.label}</div>
+          <div style="font-size:11px;color:#4a4a5e;margin-top:1px">${g.email} · <span class="tk-plan ${planCls(g.plan)}">${g.plan}</span></div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:#8888a0;text-transform:uppercase;letter-spacing:.08em">Reset</div>
+        <div style="font-size:15px;font-weight:700;color:#4a4a5e">${resetText}</div>
+      </div>
+    </div>
+    <div style="width:100%;display:flex;gap:16px">
+      <div style="flex:1;background:#f0f0f6;border-radius:10px;padding:10px 14px;border:1px solid #e5e5ee">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div>
+            <span style="font-size:12px;font-weight:800;color:#38bdf8">🔵 Google</span>
+            <span style="font-size:10px;color:#8888a0;margin-left:6px">${g.geminiModel}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="tk-dispo-val ${dispCls(gPct)}" style="font-size:13px">${gDep?'Épuisé':gAvail+'%'}</span>
+            <button class="tk-gear" onclick="openTkModal('${g.geminiId}')" style="padding:3px 5px;font-size:11px">⚙️</button>
+          </div>
+        </div>
+        <div class="tk-bar"><div class="tk-bar-fill ${barCls(gPct)}" style="width:${Math.min(100,gPct)}%"></div></div>
+      </div>
+      <div style="flex:1;background:#f0f0f6;border-radius:10px;padding:10px 14px;border:1px solid #e5e5ee">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div>
+            <span style="font-size:12px;font-weight:800;color:#f59e0b">🟠 Anthropic</span>
+            <span style="font-size:10px;color:#8888a0;margin-left:6px">${g.sonnetModel}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="tk-dispo-val ${dispCls(sPct)}" style="font-size:13px">${sDep?'Épuisé':sAvail+'%'}</span>
+            <button class="tk-gear" onclick="openTkModal('${g.sonnetId}')" style="padding:3px 5px;font-size:11px">⚙️</button>
+          </div>
+        </div>
+        <div class="tk-bar"><div class="tk-bar-fill ${barCls(sPct)}" style="width:${Math.min(100,sPct)}%"></div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function openTkModal(id) {
+  const entry = ALL_ENTRIES.find(a => a.id === id);
+  if (!entry) return;
+  const state = getTkState(id, entry.resetDays);
+  activeModalId = id;
+  document.getElementById('tk-modal-icon').textContent  = id.includes('gemini') ? '🔵' : '🟠';
+  document.getElementById('tk-modal-name').textContent  = entry.name;
+  document.getElementById('tk-modal-email').textContent = entry.email;
+  document.getElementById('tk-modal-usage').value       = state.usage;
+  document.getElementById('tk-modal-usage-val').textContent = state.usage + '%';
+  document.getElementById('tk-modal-reset').value       = fmtInput(state.resetTs);
+  document.getElementById('tk-modal-overlay').classList.add('active');
+}
+function closeTkModal() {
+  document.getElementById('tk-modal-overlay').classList.remove('active');
+  activeModalId = null;
+}
+function saveTkModal() {
+  if (!activeModalId) return;
+  const usage   = parseInt(document.getElementById('tk-modal-usage').value, 10);
+  const resetTs = new Date(document.getElementById('tk-modal-reset').value).getTime();
+  saveTkState(activeModalId, { usage, resetTs });
+  closeTkModal();
+  renderTokenHub();
+  const t = document.createElement('div');
+  t.textContent = '✓ Mis à jour !';
+  t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid #00b884;color:#1a1a2e;padding:8px 20px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,.08);animation:fadeOut 2s forwards';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+function renderTokenHub() {
+  const claudeHtml = CLAUDE_ACCOUNTS.map(claudeCard).join('');
+  const googleHtml = AG_ACCOUNTS.map(googleCard).join('');
+  document.getElementById('tk-grid').innerHTML = claudeHtml + googleHtml;
+}
+
+document.addEventListener('DOMContentLoaded', renderTokenHub);
+document.getElementById('tk-modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeTkModal();
+});
+</script>
+
+</body>
+</html>
