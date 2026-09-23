@@ -22,7 +22,7 @@ This repo gives you that view : a single static HTML page that scans your filesy
 
 This repository also publishes standalone skills under [`skill/`](./skill/README.md).
 
-The full public catalog currently contains **22 standalone skills across 6 repositories**. Skills that belong to specialized toolkits remain canonical in those repositories and are indexed from [`skill/README.md`](./skill/README.md) instead of being duplicated here.
+The full public catalog currently contains **24 standalone skills across 6 repositories**. Skills that belong to specialized toolkits remain canonical in those repositories and are indexed from [`skill/README.md`](./skill/README.md) instead of being duplicated here.
 
 ## Quickstart (5 steps, ~3 minutes)
 
