@@ -6,7 +6,7 @@ description: >-
   jusqu'à un résultat mesuré → architecturer la boucle autour d'une compétence / procédure propriétaire :
   readiness, prémortem, délégation, mesure, état, apprentissage, dry run et arrêt. Réutiliser l'existant ;
   ne jamais recopier toute la méthode dans le prompt de reprise.
-version: 0.2.1
+version: 0.2.2
 status: public
 ---
 
@@ -279,11 +279,13 @@ Pour une action sensible, le dry run peut s'arrêter juste avant le gate final.
 
 ---
 
-# 15. Premier run réel supervisé
+# 15. Premier run réel : calibrer la confiance
 
-Ne lancez pas une boucle neuve toute la nuit dès le premier essai.
+Le but d'une bonne boucle est de réduire la supervision.
 
-Faites d'abord un vrai run supervisé et vérifiez le chemin critique :
+Pour une première exécution, il est généralement préférable d'observer au moins un cycle complet, surtout si la tâche est longue, coûteuse, nouvelle ou sensible.
+
+Vérifiez simplement :
 - le bon skill se charge ;
 - les étapes s'enchaînent correctement ;
 - les délégations reviennent ;
@@ -292,9 +294,9 @@ Faites d'abord un vrai run supervisé et vérifiez le chemin critique :
 - le stop fonctionne ;
 - aucun comportement ou coût inattendu n'apparaît.
 
-Le dry run valide l'architecture. Le premier run supervisé valide le comportement réel.
+Le dry run valide l'architecture. Ce premier cycle observé calibre la confiance dans le comportement réel.
 
-**Longue autonomie / nuit seulement après ce PASS.**
+Ce n'est pas une règle absolue pour les boucles faibles risques et réversibles. En revanche, avant une première exécution longue ou nocturne, observer au moins un cycle est la recommandation par défaut.
 
 ---
 
@@ -317,7 +319,7 @@ Une boucle est prête seulement si :
 - [ ] le chemin d'apprentissage est défini ;
 - [ ] le stop est défini ;
 - [ ] le dry run passe ;
-- [ ] un vrai run supervisé passe avant toute longue autonomie / nuit.
+- [ ] le niveau de supervision du premier run est adapté au risque, au coût, à la durée et à la réversibilité.
 
 ---
 
