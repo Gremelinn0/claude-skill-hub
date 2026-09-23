@@ -47,22 +47,40 @@ Do not use it for trivial, fully specified, reversible tasks.
 
 An explicit invocation of this skill implies at least D2 unless the user says otherwise.
 
+## Package structure
+
+This public skill is **self-contained**.
+
+The specialized methods that may exist as separate private/internal skills in another system are bundled here as references:
+
+- `references/poser-le-probleme.md` — full problem framing before solutioning;
+- `references/racine.md` — structural root-cause analysis;
+- `references/optimise-systeme.md` — objective system optimization;
+- `references/challenge-premortem.md` — adversarial pre-mortem.
+
+They are **methods inside this skill**, not installation prerequisites.
+
+Installing / copying this folder must be sufficient to use the router.
+
 ## Routing rule
 
 Do not run every method. Choose the **smallest set of lenses that can change the decision**.
 
-| Signal | Lens |
+| Signal | Bundled method |
 |---|---|
-| unclear problem | problem framing |
-| recurring bug / symptom / workaround | root-cause analysis |
-| many interacting rules, tools, owners, or processes | systems analysis |
-| architecture / source-of-truth ambiguity | architecture mapping |
-| one idea is being refined too early | option generation |
-| important plan not yet executed | adversarial pre-mortem |
-| business / market / strategy decision | hand off to a strategy-consulting router if available |
+| unclear / incomplete problem map | load `references/poser-le-probleme.md` |
+| recurring bug / symptom / workaround | load `references/racine.md` |
+| bloated / tangled system or governance problem | load `references/optimise-systeme.md` |
+| important plan not yet executed | load `references/challenge-premortem.md` |
+| architecture / source-of-truth ambiguity | use the system-mapping workflow in this file, plus root-cause or optimization if needed |
+| one idea is being refined too early | use the option-generation workflow in this file |
+| business / market / strategy decision | hand off to a strategy-consulting router if one is installed; otherwise stay in generic decision analysis |
 
-If a specialized local skill exists for a lens, invoke it. Otherwise apply the lens directly here.
-Never pretend an unavailable skill was called.
+Load a bundled reference only when its method is needed.
+
+If the host happens to have an equivalent local skill, it may use that local owner instead. But the public package must never require it.
+
+Never pretend an unavailable external skill was called.
 
 ## Workflow
 
@@ -77,6 +95,8 @@ Capture:
 - the decision that must be made.
 
 ### 2. Frame the whole problem
+
+For ambiguous or repeatedly misunderstood problems, load `references/poser-le-probleme.md` first.
 
 Write separately:
 
@@ -117,6 +137,8 @@ Look for:
 - places where evidence is lost.
 
 ### 5. Go below the symptom
+
+For recurring defects, workarounds, or symptoms that keep returning, load `references/racine.md`.
 
 Ask why until you reach a structural cause that can explain recurrence.
 
@@ -167,6 +189,8 @@ A plan that cannot fail in its wording cannot be tested.
 
 ### 8. Attack the plan
 
+For material or hard-to-reverse plans, load `references/challenge-premortem.md`.
+
 Before execution, run a pre-mortem:
 
 - What is the strongest reason this plan could fail?
@@ -197,6 +221,12 @@ Use:
 🗂️ Execution plan:
 ➡️ Next owner / next step:
 ```
+
+## System optimization branch
+
+When the problem is not one defect but the quality of the system itself — too many rules, duplicated responsibilities, stale maps, weak ownership, or excessive maintenance cost — load `references/optimise-systeme.md`.
+
+Its invariant is simple: **measure before simplifying, then re-measure after the change.**
 
 ## Handoff to execution
 
