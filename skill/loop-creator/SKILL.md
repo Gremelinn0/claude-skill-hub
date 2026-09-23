@@ -6,7 +6,7 @@ description: >-
   jusqu'à un résultat mesuré → architecturer la boucle autour d'une compétence / procédure propriétaire :
   readiness, prémortem, délégation, mesure, état, apprentissage, dry run et arrêt. Réutiliser l'existant ;
   ne jamais recopier toute la méthode dans le prompt de reprise.
-version: 0.2.0
+version: 0.2.1
 status: public
 ---
 
@@ -279,7 +279,26 @@ Pour une action sensible, le dry run peut s'arrêter juste avant le gate final.
 
 ---
 
-# 15. Gate avant armement
+# 15. Premier run réel supervisé
+
+Ne lancez pas une boucle neuve toute la nuit dès le premier essai.
+
+Faites d'abord un vrai run supervisé et vérifiez le chemin critique :
+- le bon skill se charge ;
+- les étapes s'enchaînent correctement ;
+- les délégations reviennent ;
+- la métrique mesure réellement ;
+- l'état et les preuves s'écrivent ;
+- le stop fonctionne ;
+- aucun comportement ou coût inattendu n'apparaît.
+
+Le dry run valide l'architecture. Le premier run supervisé valide le comportement réel.
+
+**Longue autonomie / nuit seulement après ce PASS.**
+
+---
+
+# 16. Gate avant armement
 
 Une boucle est prête seulement si :
 
@@ -297,29 +316,26 @@ Une boucle est prête seulement si :
 - [ ] le journal conserve les preuves ;
 - [ ] le chemin d'apprentissage est défini ;
 - [ ] le stop est défini ;
-- [ ] le dry run passe.
+- [ ] le dry run passe ;
+- [ ] un vrai run supervisé passe avant toute longue autonomie / nuit.
 
 ---
 
-# 16. Prompt de reprise
+# 17. Prompt de reprise
 
-Le prompt doit rester court.
+Le prompt est minuscule.
 
-Exemple générique :
+Exemple :
 
 ~~~text
-/loop <cadence> /<competence> — reprends <boucle> : état d'abord, une unité de travail, preuve, journal, STOP au cap.
+/loop 20m /<competence>
 ~~~
 
-La syntaxe exacte dépend du moteur disponible.
-
-Ce qui compte :
-
-> le réveil recharge la compétence et l'état actuels au lieu d'embarquer une copie figée de leur méthode.
+La compétence recharge la méthode ; l'état et les preuves vivent dans leurs sources. Ne recopiez pas ces éléments dans le prompt de reprise.
 
 ---
 
-# 17. Réparer une boucle existante
+# 18. Réparer une boucle existante
 
 Ne pas tout migrer d'un coup.
 
@@ -336,7 +352,7 @@ C'est une migration « on touch ».
 
 ---
 
-# 18. Quand NE PAS utiliser Loop Creator
+# 19. Quand NE PAS utiliser Loop Creator
 
 Ce n'est pas une vraie boucle autonome si la répétition n'a ni progression ni apprentissage.
 
@@ -402,6 +418,7 @@ MEASUREMENT:
 STOP:
 LEARNING:
 DRY_RUN:
+FIRST_SUPERVISED_RUN:
 READY_TO_ARM:
 ~~~
 
