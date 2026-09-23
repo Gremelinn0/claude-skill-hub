@@ -13,6 +13,8 @@ The public skill ecosystem is larger than this folder: specialized toolkits stay
 | [`import-skills-into-my-system`](./import-skills-into-my-system/SKILL.md) | Migrate an existing agent system toward a reference architecture while preserving useful customizations. |
 | [`loop-creator`](./loop-creator/SKILL.md) | Build resumable autonomous work loops without freezing the business method inside the resume prompt. |
 | [`skill-finder-research`](./skill-finder-research/SKILL.md) | Research and benchmark external skills/methods before adoption. |
+| [`router-reflexion-profonde`](./router-reflexion-profonde/SKILL.md) | Force a read-only deep-reasoning phase before executing complex or structural changes. |
+| [`router-consulting-strategy`](./router-consulting-strategy/SKILL.md) | Route business decisions through consulting-style framing, hypotheses, options and stress tests. |
 
 ## Other public skill repositories
 
@@ -66,4 +68,4 @@ These are intentionally **not duplicated here**.
 - `resources/` = compatibility links, deprecated resources and non-skill supporting material.
 - A skill whose real owner is another public toolkit remains there and is linked above instead of copied here.
 
-Current catalog: **22 standalone public skills across 6 repositories**.
+Current catalog: **24 standalone public skills across 6 repositories**.
