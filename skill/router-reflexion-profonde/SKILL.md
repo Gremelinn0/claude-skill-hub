@@ -1,19 +1,18 @@
 ---
 name: router-reflexion-profonde
 description: >-
-  Orchestrates a read-only deep-reasoning phase before execution for complex, structural,
-  cross-cutting, or hard-to-reverse problems. Use when an AI is likely to jump to a plausible
-  answer too quickly, when the real problem is unclear, or when you need facts, system mapping,
-  root-cause analysis, real alternatives, falsifiable success criteria, and a pre-mortem before
-  any change. Triggers include "think deeply before acting", "challenge the plan", "find the root
-  cause", "take a step back", and French equivalents such as "réfléchis avant d'agir".
+  Orchestrates a read-only reasoning phase whenever a task deserves real thought before action:
+  decisions, writing, strategy, planning, debugging, product work, architecture, or any ambiguous
+  task where the first plausible answer may be premature. Frames just enough, then loads only the
+  methods that matter: problem framing, root-cause analysis, system optimization, alternatives, or
+  adversarial pre-mortem. Skip it for trivial, fully specified work.
 ---
 
 # Deep Reflection Router
 
 ## Purpose
 
-Turn a complex request into a **decision-quality understanding before execution**.
+Turn a task that deserves reflection into **decision-quality understanding before execution**.
 
 This skill exists to prevent a common failure mode: an AI understands the user's intent, produces
 a plausible answer, and starts acting before it has actually investigated the problem.
@@ -26,26 +25,29 @@ and the execution mandate is clear.
 
 ## When to use
 
-Use this router when at least one is true:
+Use this router whenever a task is not trivial and the quality of the reasoning matters before action.
 
-- the problem is ambiguous, structural, or spans multiple components;
-- a previous fix treated symptoms instead of causes;
-- the change is costly or difficult to reverse;
-- several plausible solutions exist;
-- the plan depends on unverified assumptions;
-- the user explicitly asks for deep thinking before action.
+Typical signals:
+- the problem or goal is still ambiguous;
+- facts and assumptions are mixed;
+- several plausible options exist;
+- a previous answer or fix treated the wrong problem;
+- the work has meaningful consequences;
+- the user explicitly asks to think, challenge, compare, or investigate before acting.
 
-Do not use it for trivial, fully specified, reversible tasks.
+This applies to technical and non-technical work alike.
+
+Do not use it for trivial, fully specified tasks where reflection would add ceremony rather than value.
 
 ## Depth
 
 | Level | Use when | Minimum treatment |
 |---|---|---|
-| D1 | Local non-trivial decision | framing + one main analysis lens + inline pre-mortem |
-| D2 | Structural / cross-cutting problem | evidence + system map + 2 complementary lenses + 3 options + pre-mortem |
-| D3 | Architecture / migration / high-cost decision | D2 + independent challenge + non-loss criteria + explicit decision gate |
+| D1 | Any non-trivial task where an immediate answer would be premature | light framing + one useful lens + decision / answer |
+| D2 | Multiple hypotheses, options, dependencies or consequences | evidence + 2 complementary lenses + alternatives + contradiction |
+| D3 | High-cost, hard-to-reverse or strategic decision | D2 + independent challenge + non-loss criteria + explicit decision gate |
 
-An explicit invocation of this skill implies at least D2 unless the user says otherwise.
+An explicit invocation starts at the **minimum sufficient depth**. Do not turn a D1 task into a D2/D3 ceremony.
 
 ## Package structure
 
@@ -94,19 +96,17 @@ Capture:
 - what is explicitly out of scope;
 - the decision that must be made.
 
-### 2. Frame the whole problem
+### 2. Frame only as much as the task needs
 
-For ambiguous or repeatedly misunderstood problems, load `references/poser-le-probleme.md` first.
+Write:
+1. what must be understood, decided, or produced;
+2. what is already established;
+3. which assumptions or unknowns could change the answer;
+4. the success criterion.
 
-Write separately:
+Load `references/poser-le-probleme.md` only when the **problem map itself is uncertain**: several objects or actors, repeated misunderstanding, ambiguous scope, or conflicting roles.
 
-1. observed symptom / dissatisfaction;
-2. desired outcome;
-3. system capable of producing that outcome;
-4. decision to make now;
-5. objective signal that would prove improvement.
-
-If the success signal cannot be written, the problem is not framed yet.
+The router chooses methods. It does not turn every method into a mandatory checklist.
 
 ### 3. Reconstruct reality
 
@@ -121,9 +121,9 @@ Separate:
 
 Prefer runtime evidence, logs, real consumers, and current owners over documentation alone.
 
-### 4. Map the system
+### 4. Map a system only when a system is actually involved
 
-Trace the useful chain end to end:
+If the task depends on multiple components, actors, sources of truth or dependencies, trace the useful chain end to end:
 
 `input → mechanisms → owners → sources of truth → execution → evidence → decision`
 
@@ -187,11 +187,13 @@ List:
 
 A plan that cannot fail in its wording cannot be tested.
 
-### 8. Attack the plan
+### 8. Attack the plan when the plan deserves it
 
-For material or hard-to-reverse plans, load `references/challenge-premortem.md`.
+For material, uncertain or hard-to-reverse plans, load `references/challenge-premortem.md`.
 
-Before execution, run a pre-mortem:
+Do not run a pre-mortem on every D1 task.
+
+When appropriate, ask:
 
 - What is the strongest reason this plan could fail?
 - Which assumption would reverse the recommendation if false?
