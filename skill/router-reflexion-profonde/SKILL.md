@@ -58,6 +58,7 @@ The specialized methods that may exist as separate private/internal skills in an
 - `references/poser-le-probleme.md` — full problem framing before solutioning;
 - `references/racine.md` — structural root-cause analysis;
 - `references/optimise-systeme.md` — objective system optimization;
+- `references/bmad-brainstorming.md` + `references/bmad-brain-methods.csv` — structured divergence using a library of 61 brainstorming techniques;
 - `references/challenge-premortem.md` — adversarial pre-mortem.
 
 They are **methods inside this skill**, not installation prerequisites.
@@ -73,9 +74,9 @@ Do not run every method. Choose the **smallest set of lenses that can change the
 | unclear / incomplete problem map | load `references/poser-le-probleme.md` |
 | recurring bug / symptom / workaround | load `references/racine.md` |
 | bloated / tangled system or governance problem | load `references/optimise-systeme.md` |
+| one idea is being refined too early / solution space is too narrow | load `references/bmad-brainstorming.md` and select relevant techniques from `references/bmad-brain-methods.csv` |
 | important plan not yet executed | load `references/challenge-premortem.md` |
 | architecture / source-of-truth ambiguity | use the system-mapping workflow in this file, plus root-cause or optimization if needed |
-| one idea is being refined too early | use the option-generation workflow in this file |
 | business / market / strategy decision | hand off to a strategy-consulting router if one is installed; otherwise stay in generic decision analysis |
 
 Load a bundled reference only when its method is needed.
@@ -154,6 +155,8 @@ Examples:
 Do not stop at "the file is wrong" or "the agent forgot".
 
 ### 6. Open options before converging
+
+When the solution space is narrow, one idea is being polished too early, or the first options are too similar, load `references/bmad-brainstorming.md` and use the bundled technique library to force genuinely different angles.
 
 For D2/D3, produce at least 3 genuinely different options.
 
