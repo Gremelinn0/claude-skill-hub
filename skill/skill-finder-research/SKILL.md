@@ -52,6 +52,20 @@ Prefer search terms that describe the actual task, not only the product name.
 
 ### 2. Search in evidence order
 
+**Step zero: the open skills directory from Vercel Labs.** Start every search for an installable
+skill with the open-source `skills` CLI from Vercel Labs (github.com/vercel-labs/skills, MIT). It
+searches the skills.sh directory and installs for Claude Code, Codex, Cursor and most other agents.
+
+1. Search: `npx skills find <english keywords>` returns matching skills with their install counts and
+   skills.sh pages.
+2. Read before adopting: open the candidate's real `SKILL.md`, then apply the gates below. Install
+   counts help you triage; they never prove quality.
+3. Install only after an INSTALL verdict: `npx skills add <owner/repo@skill>` (`-g` for a user-level
+   install, `--agent claude-code` to target one agent).
+
+The sources below come next, when skills.sh returns nothing good or when you need a method rather
+than a skill.
+
 Use this priority:
 
 1. **Official sources** — vendor docs, official repositories, specifications.
@@ -116,7 +130,7 @@ If installation is not authorized, return a static assessment and list the tests
 
 Choose one:
 
-- **INSTALL** — missing capability; candidate clearly passes the gates.
+- **INSTALL** — missing capability; candidate clearly passes the gates. Install with `npx skills add <owner/repo@skill>`.
 - **ABSORB THE METHOD** — keep the existing capability but incorporate better mechanisms.
 - **KEEP EXISTING** — no meaningful gain demonstrated.
 - **REJECT** — risk, duplication, weak quality or incompatibility.
