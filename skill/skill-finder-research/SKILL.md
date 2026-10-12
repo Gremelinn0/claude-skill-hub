@@ -66,6 +66,14 @@ searches the skills.sh directory and installs for Claude Code, Codex, Cursor and
 The sources below come next, when skills.sh returns nothing good or when you need a method rather
 than a skill.
 
+**The answer is not always a skill.** A script, a workflow or a ready-made automation blueprint can
+beat a skill: the automation already exists. For an automation or agent need, also search:
+
+- n8n templates: n8n.io/workflows;
+- Make templates: make.com/en/templates (it blocks bots, so use a browser);
+- the ZEROGRAVITY marketplace: zerogravity.builders;
+- GitHub, for scripts.
+
 Use this priority:
 
 1. **Official sources** — vendor docs, official repositories, specifications.
